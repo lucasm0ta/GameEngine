@@ -12,7 +12,6 @@ Sound::Sound(GameObject &associated, std::string file) : Sound(associated) {
 
 Sound::~Sound() {
     if (chunk != nullptr) {
-        SDL_Delay(duration);
         Mix_FreeChunk(chunk);
     }
 }
@@ -24,6 +23,10 @@ void Sound::Play(int times) {
     } else {
         std::cerr<< "No sound to be played"<<std::endl;
     }
+}
+
+bool Sound::Playing() {
+    return (Mix_Playing(channel) == 1);
 }
 
 void Sound::Stop() {
@@ -39,11 +42,8 @@ void Sound::Open(std::string file) {
     chunk = Mix_LoadWAV(file.c_str());
     if (chunk == nullptr){
         std::cerr<< "Failed to open WAV"<<std::endl;
-    } else {
-    	Mix_QuerySpec(&frequency, &format, &channels);
-        duration = Sound::computeChunkLengthMillisec(chunk->alen);
-        // std::cerr<< "Carregou som at "<<&(*this)<<std::endl;
     }
+    // std::cerr<< "Carregou som at "<<&(*this)<<std::endl;
 }
 
 bool Sound::IsOpen() {
@@ -58,20 +58,4 @@ void Sound::Render() {
 
 bool Sound::Is(std::string type) {
     return type == "Sound";
-}
-
-int Sound::computeChunkLengthMillisec(int chunkSize) {
-    /* bytes / samplesize == sample points */
-	const int points = chunkSize / formatSampleSize(format);
-
-	/* sample points / channels == sample frames */
-	const int frames = (points / channels);
-
-	/* (sample frames * 1000) / frequency == play length, in ms */
-	return ((frames * 1000) / frequency);
-}
-
-int Sound::formatSampleSize(int format)
-{
-	return (format & 0xFF) / 8;
 }

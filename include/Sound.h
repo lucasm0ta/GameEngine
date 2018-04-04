@@ -13,6 +13,7 @@ public:
     ~Sound();
 
     void Play(int times = 1);
+    bool Playing();
     void Stop();
     void Open(std::string file);
     bool IsOpen();
@@ -22,14 +23,8 @@ public:
     bool Is(std::string type);
 
 private:
-    int computeChunkLengthMillisec(int chunkSize);
-    inline int formatSampleSize(int format);
     Mix_Chunk* chunk;
     int channel;
-    int duration;
-    int frequency;
-    Uint16 format;
-    int channels;
 };
 
 #endif /* SOUND_H */

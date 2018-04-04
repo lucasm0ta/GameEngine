@@ -5,7 +5,7 @@
 
 class Rect {
 public:
-    Rect () = default; 
+    Rect () = default;
     Rect (float x, float y, float w, float h);
     bool Contains(float x, float y) const;
     Vec2 Center() const;

@@ -55,8 +55,11 @@ void State::Update(float dt) {
         //std::cout<<"Obj:"<<i<<std::endl;
         if (objectArray[i]->IsDead()) {
             // std::cout<<"Morreu de fato"<<std::endl;
-            objectArray.erase(objectArray.begin() + i);
-            i--; //adjust iterator ???
+            auto soundComp = objectArray[i].get()->GetComponent("Sound");
+            if (!soundComp || static_cast<Sound *>(soundComp)->Playing()) {
+                objectArray.erase(objectArray.begin() + i);
+                i--; //adjust iterator ???
+            }
         }
     }
 }
@@ -100,7 +103,7 @@ void State::Input() {
                         //std::cout<<"\tBefore Damage:"<<(go->IsDead()?"Dead":"Alive")<<std::endl;
 
                         //std::cout<<"1GO addr:"<<&(*go)<<std::endl;
-						face->Damage(30);
+                        face->Damage(std::rand() % 10 + 10);
 						// Sai do loop (só queremos acertar um)
 						break;
 					}

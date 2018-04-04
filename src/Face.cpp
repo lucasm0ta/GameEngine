@@ -13,7 +13,6 @@ void Face::Damage(int damage) {
         associated.RequestDelete();
         auto sound = reinterpret_cast<Sound*>(associated.GetComponent("Sound"));
         if (sound != nullptr) {
-            std::cout<<"PLAYY1"<<std::endl;
             sound->Play();
         }
     } else {
