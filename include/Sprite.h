@@ -1,20 +1,26 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include <string>
 #include <SDL2/SDL.h>
 
-class Sprite {
+#include "Component.h"
+#include "GameObject.h"
+
+class Sprite : public Component {
 public:
-    Sprite();
-    Sprite(std::string file);
+    Sprite(GameObject &associated);
+    Sprite(GameObject &associated, std::string file);
     ~Sprite();
-    void Open(std::string file);
-    void SetClip(int x, int y, int w, int h);
-    void Render(int x, int y);
-    int GetWidth();
+
     int GetHeight();
+    int GetWidth();
+
+    bool Is(std::string type);
     bool IsOpen();
+    void Open(std::string file);
+    void Render();
+    void SetClip(int x, int y, int w, int h);
+    void Update(float dt);
 
 private:
     SDL_Texture *texture;

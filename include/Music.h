@@ -13,7 +13,7 @@ public:
     void Play(int time = -1);
     void Stop(int msToStop = 1500);
     void Open(std::string file);
-    bool isOpen();
+    bool IsOpen();
 
 private:
     Mix_Music *music;

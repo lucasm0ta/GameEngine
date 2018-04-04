@@ -14,7 +14,7 @@ LIBS = -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lm
 INC_PATHS = -I$(INC_PATH) $(addprefix -I,$(SDL_INC_PATH))
 
 FLAGS = -std=c++11 -Wall -pedantic -Wextra -Wno-unused-parameter -Werror=init-self
-DFLAGS = -ggdb -O0 -DDEBUG
+DFLAGS = -ggdb3 -O0 -DDEBUG
 RFLAGS = -O3 -mtune=native
 
 INC_PATH = include
@@ -66,7 +66,7 @@ $(EXEC): $(OBJ_FILES)
 	$(COMPILER) -o $@ $^ $(LINK_PATH) $(LIBS) $(FLAGS)
 
 $(BIN_PATH)/%.o: $(DEP_PATH)/%.d | folders
-	$(COMPILER) $(INC_PATH) $(addprefix $(SRC_PATH)/,$(notdir $(<:.d=.cpp))) -c $(FLAGS) -o $@
+	$(COMPILER) $(INC_PATHS) $(addprefix $(SRC_PATH)/,$(notdir $(<:.d=.cpp))) -c $(FLAGS) -o $@
 
 $(DEP_PATH)/%.d: $(SRC_PATH)/%.cpp | folders
 	$(COMPILER) $(INC_PATHS) $< $(DEP_FLAGS) $(FLAGS)
@@ -83,12 +83,10 @@ clean:
 #--------------------------
 #--------------------------
 
+.PRECIOUS: $(DEP_FILES)
+.PHONY: release debug clean folders help
 .SECONDEXPANSION:
 -include $$(DEP_FILES)
-
-.PRECIOUS: $(DEP_FILES)
-
-.PHONY: release debug clean folders help
 
 release: FLAGS += $(RFLAGS)
 release: $(EXEC)

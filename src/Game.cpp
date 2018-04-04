@@ -4,6 +4,8 @@
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 
 Game *Game::instance = nullptr;
 
@@ -58,6 +60,7 @@ Game::Game(std::string title, int width, int height) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		SDL_Quit();
 	}
+	srand(time(NULL));
 }
 
 Game::~Game() {
@@ -82,8 +85,6 @@ Game &Game::GetInstance() {
 
 void Game::Run() {
 	state = new State();
-    Music mus("./assets/audio/stageState.ogg");
-    mus.Play();
     while (!state->QuitRequested()) {
         state->Update(1);
         state->Render();

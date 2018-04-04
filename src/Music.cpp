@@ -39,6 +39,6 @@ void Music::Open(std::string file) {
     }
 }
 
-bool Music::isOpen() {
+bool Music::IsOpen() {
     return (music != nullptr);
 }

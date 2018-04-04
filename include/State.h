@@ -3,18 +3,26 @@
 
 #include "Sprite.h"
 #include "Music.h"
+#include "GameObject.h"
 
+#include <vector>
+#include <memory>
 
 class State {
 public:
     State();
-    bool QuitRequested();
+    ~State();
+
     void LoadAssets();
+    bool QuitRequested();
     void Update(float dt);
     void Render();
 
 private:
-    Sprite bg;
+    void Input();
+    void AddObject(int mouseX, int MouseY);
+
+    std::vector<std::unique_ptr<GameObject>> objectArray;
     Music music;
     bool quitRequested;
 };
