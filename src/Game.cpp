@@ -24,7 +24,9 @@ Game::Game(std::string title, int width, int height) {
     // SDL_INIT_HAPTIC
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) != 0){
-		std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
+		std::cerr << "Error SDL_Init: " << SDL_GetError() << std::endl;
+		hasStarted = false;
+		return;
 	}
 
     // FLAGS
@@ -33,11 +35,11 @@ Game::Game(std::string title, int width, int height) {
     // IMG_INIT_TIF
 
 	int flags_img = IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF;
-    int init_img = IMG_Init(flags);
-	if (init_img&flags_img != flags_img) {
-		printf("IMG_Init: Failed to init required jpg and png support!\n");
-    	printf("IMG_Init: %s\n", IMG_GetError());
+    int init_img = IMG_Init(flags_img);
+	if ((init_img&flags_img) != flags_img) {
+		printf("Error IMG_Init: %s\n", IMG_GetError());
 		SDL_Quit();
+		hasStarted = false;
 		return;
 	}
     // FLAGS
@@ -48,20 +50,21 @@ Game::Game(std::string title, int width, int height) {
     // MIX_INIT_FLUIDSYNTH
     // MIX_INIT_MODPLUG
 
-	int flags_mix = MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG;
-    int init_mix = Mix_Init(flags);
-	if (init_mix&flags_mix != flags_mix) {
-		printf("Mix_Init: Failed to init required ogg and mod support!\n");
-    	printf("Mix_Init: %s\n", Mix_GetError());
+    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT,
+		              MIX_DEFAULT_CHANNELS, 1024) == -1) {
+	    printf("Error Mix_OpenAudio: %s\n", Mix_GetError());
+		Mix_Quit();
 		SDL_Quit();
+		hasStarted = false;
 		return;
 	}
 
-    if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT,
-		              MIX_DEFAULT_CHANNELS, 1024) == -1) {
-	 	printf("Mix_OpenAudio: %s\n", Mix_GetError());
-		Mix_Quit();
+	int flags_mix = MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG;
+    int init_mix = Mix_Init(flags_mix);
+	if ((init_mix&flags_mix) != flags_mix) {
+		printf("Error Mix_Init: %s\n", Mix_GetError());
 		SDL_Quit();
+		hasStarted = false;
 		return;
 	}
 
@@ -70,10 +73,11 @@ Game::Game(std::string title, int width, int height) {
 	// Start Window
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
 	if (window == nullptr) {
-		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+		std::cerr << "Error SDL_CreateWindow: " << SDL_GetError() << std::endl;
 		Mix_CloseAudio();
 		Mix_Quit();
 		SDL_Quit();
+		hasStarted = false;
 		return;
 	}
 
@@ -81,13 +85,15 @@ Game::Game(std::string title, int width, int height) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (renderer == nullptr) {
 		SDL_DestroyWindow(window);
-		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
+		std::cerr << "Error SDL_CreateRenderer: " << SDL_GetError() << std::endl;
 		Mix_CloseAudio();
 		Mix_Quit();
 		SDL_Quit();
+		hasStarted = false;
 		return;
 	}
 	srand(time(NULL));
+	hasStarted = true;
 }
 
 Game::~Game() {
@@ -111,11 +117,13 @@ Game &Game::GetInstance() {
 }
 
 void Game::Run() {
-	state = new State();
-    while (!state->QuitRequested()) {
-        state->Update(1);
-        state->Render();
-        SDL_RenderPresent(renderer);
-        SDL_Delay(33);
-    }
+	if (hasStarted){
+		state = new State();
+	    while (!state->QuitRequested()) {
+	        state->Update(1);
+	        state->Render();
+	        SDL_RenderPresent(renderer);
+	        SDL_Delay(33);
+	    }
+	}
 }

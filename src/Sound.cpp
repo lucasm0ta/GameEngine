@@ -18,14 +18,17 @@ Sound::~Sound() {
 
 void Sound::Play(int times) {
     if (chunk != nullptr) {
-        channel = Mix_PlayChannel(-1, chunk, 1);
-        // std::cerr<< "Sound at channel:"<<channel<<" at "<<&(*this)<<std::endl;
+        if (!Playing()) {
+            channel = Mix_PlayChannel(-1, chunk, 0);
+            // std::cerr<< "Sound at channel:"<<channel<<" at "<<&(*this)<<std::endl;
+        }
     } else {
         std::cerr<< "No sound to be played"<<std::endl;
     }
 }
 
 bool Sound::Playing() {
+    //std::cout<<"Ta tocando"<<(Mix_Playing(channel)?"True":"False")<<std::endl;
     return (Mix_Playing(channel) == 1);
 }
 

@@ -13,12 +13,12 @@ Music::~Music() {
     }
 }
 
-void Music::Play(int time) {
+void Music::Play(int times) {
     if (music == nullptr) {
         std::cerr << "Error Music: There is no music to be played." << std::endl;
         return;
     }
-    if (Mix_PlayMusic(music, time) == -1) { // error
+    if (Mix_PlayMusic(music, times) == -1) { // error
         std::cerr << "Error Music SDL(Play): " << Mix_GetError() <<std::endl;
         return;
     }

@@ -1,6 +1,8 @@
 #ifndef VEC2_H
 #define VEC2_H
 
+#include <iostream>
+
 class Vec2 {
 public:
     Vec2 (float x, float y);
@@ -14,7 +16,7 @@ public:
     Vec2 operator-(const Vec2 &a) const;
 
     Vec2& operator=(const Vec2 &a) = default;
-    //Vec2& operator=(const Vec2& a);
+    friend std::ostream& operator<<(std::ostream& os, const Vec2& a);
 
     float x;
     float y;

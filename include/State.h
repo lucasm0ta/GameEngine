@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <memory>
+#include <random>
 
 class State {
 public:
@@ -25,6 +26,8 @@ private:
     std::vector<std::unique_ptr<GameObject>> objectArray;
     Music music;
     bool quitRequested;
+    std::random_device randDevice;
+    std::mt19937 randGen;
 };
 
 #endif /* STATE_H */

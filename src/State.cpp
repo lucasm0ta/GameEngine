@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <cmath>
 
 #include "../include/State.h"
 #include "../include/Face.h"
@@ -7,7 +8,7 @@
 
 #define PI 3.14159
 
-State::State() : quitRequested(false) {
+State::State() : quitRequested(false), randGen(randDevice()) {
     Music mus("./assets/audio/stageState.ogg");
     mus.Play();
 
@@ -56,7 +57,8 @@ void State::Update(float dt) {
         if (objectArray[i]->IsDead()) {
             // std::cout<<"Morreu de fato"<<std::endl;
             auto soundComp = objectArray[i].get()->GetComponent("Sound");
-            if (!soundComp || static_cast<Sound *>(soundComp)->Playing()) {
+            if (!soundComp || !static_cast<Sound *>(soundComp)->Playing()) {
+                std::cerr << "Morreu"<<std::endl;
                 objectArray.erase(objectArray.begin() + i);
                 i--; //adjust iterator ???
             }
@@ -102,8 +104,9 @@ void State::Input() {
 
                         //std::cout<<"\tBefore Damage:"<<(go->IsDead()?"Dead":"Alive")<<std::endl;
 
-                        //std::cout<<"1GO addr:"<<&(*go)<<std::endl;
-                        face->Damage(std::rand() % 10 + 10);
+                        //std::cout<<"GO addr:"<<&(*go)<<std::endl;
+                        std::uniform_int_distribution<int> dist(0, 10);
+                        face->Damage(dist(randGen) + 10);
 						// Sai do loop (só queremos acertar um)
 						break;
 					}
@@ -118,7 +121,10 @@ void State::Input() {
 			if (event.key.keysym.sym == SDLK_ESCAPE) {
 				quitRequested = true;
 			} else {// Se não, crie um objeto
-				Vec2 objPos = Vec2(100, 0).GetRotated(- PI  + PI*(rand() % 1001)/500.0) + Vec2(mouseX, mouseY);
+                std::uniform_real_distribution<float> realDist(0, 2);
+                std::uniform_int_distribution<int> intDist(1, 200);
+                auto vec = Vec2(intDist(randGen), 0).GetRotated(PI*(realDist(randGen)));
+				Vec2 objPos = vec + Vec2(mouseX, mouseY);
 				AddObject((int)objPos.x, (int)objPos.y);
 			}
 		}

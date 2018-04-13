@@ -7,8 +7,10 @@ Vec2::Vec2 (float _x, float _y) {
     y = _y;
 }
 Vec2& Vec2::GetRotated(float rad) {
-    x = std::cos(rad)*x - std::sin(rad)*y;
-    y = std::sin(rad)*x + std::cos(rad)*y;
+    float _x = std::cos(rad)*x - std::sin(rad)*y;
+    float _y = std::sin(rad)*x + std::cos(rad)*y;
+    x = _x;
+    y = _y;
     return *this;
 }
 
@@ -35,4 +37,9 @@ Vec2 Vec2::operator+(const Vec2 &&a) const {
 
 Vec2 Vec2::operator-(const Vec2 &a) const {
     return Vec2(a.x - x, a.y - y);
+}
+
+std::ostream& operator<<(std::ostream& os, const Vec2& a) {
+    os << '(' << a.x << ',' << a.y << ')';
+    return os;
 }
