@@ -49,9 +49,11 @@ void GameObject::RemoveComponent(Component *cpt) {
     std::vector<Component*>::iterator i =  components.begin();
     while (i != components.end()) {
         if (*i == cpt){
+            delete *i;
             components.erase(i);
             break;
         }
+        i++;
     }
     //std::cout<<"RemComp isDead:"<<((isDead)?"True":"False")<<std::endl;
 }

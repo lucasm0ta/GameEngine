@@ -19,6 +19,7 @@ public:
     bool IsOpen();
     void Open(std::string file);
     void Render();
+    void Render(float x, float y);
     void SetClip(int x, int y, int w, int h);
     void Update(float dt);
 

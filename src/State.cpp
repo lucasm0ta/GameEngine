@@ -5,6 +5,8 @@
 #include "../include/State.h"
 #include "../include/Face.h"
 #include "../include/Sound.h"
+#include "../include/TileMap.h"
+#include "../include/TileSet.h"
 
 #define PI 3.14159
 
@@ -13,8 +15,18 @@ State::State() : quitRequested(false), randGen(randDevice()) {
     mus.Play();
 
     objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
-    //std::cerr <<"Mouse = ("<<mouseX<<','<<mouseY<<')'<<std::endl;
-    //std::cerr <<"Size: "<<objectArray.size()<<std::endl;
+    std::unique_ptr<GameObject> &bgObj = objectArray.back();
+
+    //std::cout<<"Created:"<<&(*obj)<<std::endl;
+    bgObj->box.x = 0;
+    bgObj->box.y = 0;
+
+    bgObj->box.w = 1024;
+    bgObj->box.h = 600;
+    Sprite *spr =  new Sprite(*bgObj, "./assets/img/ocean.jpg");
+    bgObj->AddComponent(spr);
+
+    objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
     std::unique_ptr<GameObject> &obj = objectArray.back();
 
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
@@ -24,8 +36,9 @@ State::State() : quitRequested(false), randGen(randDevice()) {
     obj->box.w = 1024;
     obj->box.h = 600;
 
-    Sprite *spr =  new Sprite(*obj, "./assets/img/ocean.jpg");
-    obj->AddComponent(spr);
+    TileSet *set = new TileSet(*obj, "./assets/img/tileset.png", 64, 64);
+    TileMap *tileMap = new TileMap(*obj, "./assets/map/tileMap.txt", set);
+    obj->AddComponent(tileMap);
 }
 
 State::~State() {

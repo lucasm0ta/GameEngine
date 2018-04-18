@@ -1,6 +1,8 @@
 #include "../include/Game.h"
 #include "../include/Sprite.h"
 #include "../include/Music.h"
+#include "../include/Resources.h"
+
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
@@ -71,7 +73,8 @@ Game::Game(std::string title, int width, int height) {
     Mix_AllocateChannels(32);
 
 	// Start Window
-	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
 	if (window == nullptr) {
 		std::cerr << "Error SDL_CreateWindow: " << SDL_GetError() << std::endl;
 		Mix_CloseAudio();
@@ -80,6 +83,16 @@ Game::Game(std::string title, int width, int height) {
 		hasStarted = false;
 		return;
 	}
+	// Set fullscreen
+	/*if (SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP) != 0) {
+		SDL_DestroyWindow(window);
+		Mix_CloseAudio();
+		Mix_Quit();
+		SDL_Quit();
+		hasStarted = false;
+		return;
+	}*/
+
 
 	// Start Renderer
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -125,5 +138,8 @@ void Game::Run() {
 	        SDL_RenderPresent(renderer);
 	        SDL_Delay(33);
 	    }
+		Resources::ClearImages();
+		Resources::ClearSound();
+		Resources::ClearMusic();
 	}
 }

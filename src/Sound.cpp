@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
+#include "../include/Resources.h"
 #include "../include/Sound.h"
 
 Sound::Sound(GameObject &associated): Component(associated), chunk(nullptr) {
@@ -11,9 +12,6 @@ Sound::Sound(GameObject &associated, std::string file) : Sound(associated) {
 }
 
 Sound::~Sound() {
-    if (chunk != nullptr) {
-        Mix_FreeChunk(chunk);
-    }
 }
 
 void Sound::Play(int times) {
@@ -39,13 +37,7 @@ void Sound::Stop() {
 }
 
 void Sound::Open(std::string file) {
-    if (chunk != nullptr) {
-        Mix_FreeChunk(chunk);
-    }
-    chunk = Mix_LoadWAV(file.c_str());
-    if (chunk == nullptr){
-        std::cerr<< "Failed to open WAV"<<std::endl;
-    }
+    chunk = Resources::GetSound(file);
     // std::cerr<< "Carregou som at "<<&(*this)<<std::endl;
 }
 
