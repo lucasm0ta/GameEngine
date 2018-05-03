@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "../include/TileMap.h"
-// #include "../include/Game.h"
+#include "../include/Camera.h"
 
 TileMap::TileMap (GameObject& associated, std::string file, TileSet *tileSet) :
     Component(associated), tileSet(tileSet) {
@@ -10,7 +10,6 @@ TileMap::TileMap (GameObject& associated, std::string file, TileSet *tileSet) :
 }
 
 TileMap::~TileMap() {
-
 }
 
 bool TileMap::Is(std::string type) {
@@ -53,20 +52,26 @@ int TileMap::At(int x, int y, int z) {
 }
 
 void TileMap::Render() {
+    Vec2 pos = Camera::pos;
     for (int i = 0; i < mapDepth; i++) {
-        RenderLayer(i, 0, 0);
+        RenderLayer(i, pos.x, pos.y);
     }
 }
 
 void TileMap::RenderLayer(int layer, int cameraX, int cameraY) {
-    for (int r = 0; r < mapWidth; r++) {
+    int tileWidth = tileSet->GetTileWidth();
+    int tileHeight = tileSet->GetTileHeight();
+    float layerFactor = std::pow(1.1, layer);
+    for (int row = 0; row < mapWidth; row++) {
         for (int col = 0; col < mapWidth; col++) {
             // std::cout << '('<<r <<','<<col << ')' <<std::endl;
-            unsigned idx = col + r * mapWidth + layer * mapHeight * mapWidth;
+            unsigned idx = col + row * mapWidth + layer * mapHeight * mapWidth;
             // std::cout << "Idx(" << idx <<") = "<<tileMatrix[idx]<< " | (" << r <<','<< col <<','<< layer<<")"<<std::endl;
-            tileSet->RenderTile(tileMatrix[idx], col, r);
-            // SDL_Delay(1500);
+            float posX = (col*tileWidth) + (cameraX*layerFactor);
+            float posY = (row*tileHeight) + (cameraY*layerFactor);
 
+            tileSet->RenderTile(tileMatrix[idx], posX, posY);
+            // SDL_Delay(1500);
 	        // SDL_RenderPresent(Game::GetInstance().GetRenderer());
         }
     }

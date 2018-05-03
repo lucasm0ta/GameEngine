@@ -16,7 +16,7 @@ void TileSet::RenderTile(unsigned index, float x, float y) {
         int tileColumn = (index-1)%columns;
         int tileRow = floor((index-1)/columns);
         tileSet.SetClip(tileColumn*tileWidth, tileRow*tileHeight, tileWidth, tileHeight);
-        tileSet.Render(x*tileWidth, y*tileHeight);
+        tileSet.Render(x, y);
         // if (x*tileWidth < 500 &&  y*tileHeight < 500) {
         //     std::cout << "TileOnImg(" << tileRow<<','<< tileColumn<<')'<<std::endl;
         //     std::cout << "Index(" << index<<')'<<std::endl;

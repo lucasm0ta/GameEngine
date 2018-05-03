@@ -2,6 +2,7 @@
 #include "../include/Sprite.h"
 #include "../include/Music.h"
 #include "../include/Resources.h"
+#include "../include/InputManager.h"
 
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_image.h>
@@ -11,7 +12,7 @@
 
 Game *Game::instance = nullptr;
 
-Game::Game(std::string title, int width, int height) {
+Game::Game(std::string title, int width, int height){
     // Start SDL
 
     // FLAGS
@@ -107,6 +108,8 @@ Game::Game(std::string title, int width, int height) {
 	}
 	srand(time(NULL));
 	hasStarted = true;
+	dt = 0;
+	frameStart = 0;
 }
 
 Game::~Game() {
@@ -133,7 +136,10 @@ void Game::Run() {
 	if (hasStarted){
 		state = new State();
 	    while (!state->QuitRequested()) {
-	        state->Update(1);
+			CalculateDeltaTime();
+			float dt = GetDeltaTime();
+			InputManager::GetInstance().Update(dt);
+	        state->Update(dt);
 	        state->Render();
 	        SDL_RenderPresent(renderer);
 	        SDL_Delay(33);
@@ -142,4 +148,14 @@ void Game::Run() {
 		Resources::ClearSound();
 		Resources::ClearMusic();
 	}
+}
+
+float Game::GetDeltaTime() {
+	return dt;
+}
+
+void Game::CalculateDeltaTime() {
+	int current = SDL_GetTicks();
+	dt = std::abs(frameStart - current)/5;
+	frameStart = current;
 }

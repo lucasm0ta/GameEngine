@@ -7,6 +7,9 @@
 #include "../include/Sound.h"
 #include "../include/TileMap.h"
 #include "../include/TileSet.h"
+#include "../include/InputManager.h"
+#include "../include/Camera.h"
+#include "../include/CameraFollower.h"
 
 #define PI 3.14159
 
@@ -23,8 +26,11 @@ State::State() : quitRequested(false), randGen(randDevice()) {
 
     bgObj->box.w = 1024;
     bgObj->box.h = 600;
-    Sprite *spr =  new Sprite(*bgObj, "./assets/img/ocean.jpg");
+    Sprite *spr = new Sprite(*bgObj, "./assets/img/ocean.jpg");
     bgObj->AddComponent(spr);
+
+    CameraFollower *follower = new CameraFollower(*bgObj);
+    bgObj->AddComponent(follower);
 
     objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
     std::unique_ptr<GameObject> &obj = objectArray.back();
@@ -60,10 +66,64 @@ void State::Render() {
 }
 
 void State::Update(float dt) {
-    Input();
+    Camera::Update(dt);
+
+    InputManager &inp = InputManager::GetInstance();
+    float mouseX, mouseY;
+    mouseX = inp.GetMouseX();
+    mouseY = inp.GetMouseY();
+    if (inp.KeyPress(ESCAPE_KEY) || inp.QuitRequested()) {
+        quitRequested = true;
+        // std::cout<<"GOOD ";
+    } else {
+        // std::cout<<"BAD ";
+    }
+    if (inp.MousePress(LEFT_MOUSE_BUTTON)) {
+    	for (int i = objectArray.size() - 1; i >= 0; --i) {
+            GameObject* go = (GameObject*) objectArray[i].get();
+
+            if (go->box.Contains((float)mouseX, (float)mouseY)) {
+                Face* face = (Face*)go->GetComponent("Face");
+                //std::cerr <<"Acertou"<<std::endl;
+                if ( nullptr != face ) {
+                    //std::cerr <<"Damage"<<std::endl;
+
+                    //std::cout<<"\tBefore Damage:"<<(go->IsDead()?"Dead":"Alive")<<std::endl;
+                    std::uniform_int_distribution<int> dist(0, 10);
+                    face->Damage(dist(randGen) + 10);
+                    break;
+                }
+            }
+    	}
+    }
+    if (inp.IsKeyDown(LEFT_ARROW_KEY)) {
+        // std::cout<<"leffft\n";
+        Camera::pos += Vec2(dt, 0);
+        // std::cout<<"CamPos:"<<Camera::pos<<" dt:"<<dt<<std::endl;
+    }
+    if (inp.IsKeyDown(RIGHT_ARROW_KEY)) {
+        Camera::pos += Vec2(-dt, 0);
+    }
+    if (inp.IsKeyDown(UP_ARROW_KEY)) {
+        Camera::pos += Vec2(0, dt);
+    }
+    if (inp.IsKeyDown(DOWN_ARROW_KEY)) {
+        Camera::pos += Vec2(0, -dt);
+    }
+    if (inp.KeyPress(SPACE_KEY)) {
+        Vec2 camPos = Camera::pos;
+        std::uniform_real_distribution<float> realDist(0, 2);
+        std::uniform_int_distribution<int> intDist(1, 200);
+        auto randVec = Vec2(intDist(randGen), 0).GetRotated(PI*(realDist(randGen)));
+        Vec2 mousePos = Vec2(mouseX, mouseY);
+        Vec2 objPos = randVec + mousePos - camPos;
+        // std::cout<<"Criou :"<<objPos<<" = "<<mousePos<<' '<<camPos<<std::endl;
+        AddObject((int)objPos.x, (int)objPos.y);
+    }
+
     //std::cout<<"Size:"<<objectArray.size()<<std::endl;
     for (unsigned int i = 0; i < objectArray.size(); i++) {
-        objectArray[i]->Update(1);
+        objectArray[i]->Update(dt);
     }
     for (unsigned int i = 0; i < objectArray.size(); i++) {
         //std::cout<<"Obj:"<<i<<std::endl;
@@ -77,71 +137,6 @@ void State::Update(float dt) {
             }
         }
     }
-}
-
-void State::Input() {
-    SDL_Event event;
-	int mouseX, mouseY;
-
-	// Obtenha as coordenadas do mouse
-	SDL_GetMouseState(&mouseX, &mouseY);
-
-	// SDL_PollEvent retorna 1 se encontrar eventos, zero caso contrário
-	while (SDL_PollEvent(&event)) {
-
-		// Se o evento for quit, setar a flag para terminação
-		if(event.type == SDL_QUIT) {
-			quitRequested = true;
-		}
-
-		// Se o evento for clique...
-		if(event.type == SDL_MOUSEBUTTONDOWN) {
-
-			// Percorrer de trás pra frente pra sempre clicar no objeto mais de cima
-			for(int i = objectArray.size() - 1; i >= 0; --i) {
-				// Obtem o ponteiro e casta pra Face.
-				//std::cout<<"From unique_ptr:"<<&(*objectArray[i])<<std::endl;
-				GameObject* go = (GameObject*) objectArray[i].get();
-				// Nota: Desencapsular o ponteiro é algo que devemos evitar ao máximo.
-				// O propósito do unique_ptr é manter apenas uma cópia daquele ponteiro,
-				// ao usar get(), violamos esse princípio e estamos menos seguros.
-				// Esse código, assim como a classe Face, é provisório. Futuramente, para
-				// chamar funções de GameObjects, use objectArray[i]->função() direto.
-
-				if(go->box.Contains((float)mouseX, (float)mouseY)) {
-					Face* face = (Face*)go->GetComponent("Face");
-                    //std::cerr <<"Acertou"<<std::endl;
-					if ( nullptr != face ) {
-                        //std::cerr <<"Damage"<<std::endl;
-						// Aplica dano
-
-                        //std::cout<<"\tBefore Damage:"<<(go->IsDead()?"Dead":"Alive")<<std::endl;
-
-                        //std::cout<<"GO addr:"<<&(*go)<<std::endl;
-                        std::uniform_int_distribution<int> dist(0, 10);
-                        face->Damage(dist(randGen) + 10);
-						// Sai do loop (só queremos acertar um)
-						break;
-					}
-				} /*else {
-                    std::cerr <<"Box: ("<<go->box.x<<','<< go->box.y<<')'<<'('<<go->box.w<<','<<go->box.h<<')'<<std::endl;
-                    std::cerr <<"Mouse: ("<<mouseX<<','<<mouseY<<')'<<std::endl;
-                }*/
-			}
-		}
-		if (event.type == SDL_KEYDOWN) {
-			// Se a tecla for ESC, setar a flag de quit
-			if (event.key.keysym.sym == SDLK_ESCAPE) {
-				quitRequested = true;
-			} else {// Se não, crie um objeto
-                std::uniform_real_distribution<float> realDist(0, 2);
-                std::uniform_int_distribution<int> intDist(1, 200);
-                auto vec = Vec2(intDist(randGen), 0).GetRotated(PI*(realDist(randGen)));
-				Vec2 objPos = vec + Vec2(mouseX, mouseY);
-				AddObject((int)objPos.x, (int)objPos.y);
-			}
-		}
-	}
 }
 
 void State::AddObject(int mouseX, int mouseY) {

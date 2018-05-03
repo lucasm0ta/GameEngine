@@ -1,6 +1,7 @@
 #include "../include/Sprite.h"
 #include "../include/Game.h"
 #include "../include/Resources.h"
+#include "../include/Camera.h"
 
 #include <iostream>
 #include <SDL2/SDL_image.h>
@@ -42,16 +43,17 @@ void Sprite::Open(std::string file) {
     height = h;
     width = w;
     SetClip(0, 0, w, h);
-
 }
 
 void Sprite::Render() {
     SDL_Rect dstRect;
-
-    dstRect.x = associated.box.x;
-    dstRect.y = associated.box.y;
+    Vec2 pos = Camera::pos;
+    dstRect.x = associated.box.x + pos.x;
+    dstRect.y = associated.box.y + pos.y;
     dstRect.w = clipRect.w;
     dstRect.h = clipRect.h;
+
+    // std::cout<<"Render at ("<<dstRect.x<<','<<dstRect.y<<')'<<std::endl;
     if (texture == nullptr) {
         std::cerr << "Error Sprite: Trying to render null texture." <<std::endl;
     }

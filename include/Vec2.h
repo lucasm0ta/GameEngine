@@ -14,8 +14,11 @@ public:
     Vec2 operator+(const Vec2 &a) const;
     Vec2 operator+(const Vec2 &&a) const;
     Vec2 operator-(const Vec2 &a) const;
+    Vec2 operator-(const Vec2 &&a) const;
 
     Vec2& operator=(const Vec2 &a) = default;
+    Vec2& operator+=(const Vec2 &a);
+    Vec2& operator+=(const Vec2 &&a);
     friend std::ostream& operator<<(std::ostream& os, const Vec2& a);
 
     float x;

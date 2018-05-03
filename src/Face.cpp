@@ -1,5 +1,6 @@
 #include "../include/Face.h"
 #include "../include/Sound.h"
+#include "../include/Camera.h"
 #include <memory>
 #include <iostream>
 
@@ -22,7 +23,7 @@ void Face::Damage(int damage) {
 }
 
 void Face::Update(float) {
-    //std::cout<<"Update GO addr:"<<&associated<<std::endl;
+    // std::cout<<"Update GO:"<<pos<<std::endl;
 }
 
 void Face::Render() {

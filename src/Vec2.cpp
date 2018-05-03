@@ -22,7 +22,7 @@ float Vec2::EuclidianDist(const Vec2 &a, const Vec2 &b) {
     return std::sqrt(std::pow(a.x-b.x, 2) + std::pow(a.y-b.y, 2));
 }
 
-float  Vec2::ManhattamDist(const Vec2 &a, const Vec2 &b) {
+float Vec2::ManhattamDist(const Vec2 &a, const Vec2 &b) {
     return std::abs(a.x-b.x) + std::abs(a.y-b.y);
 }
 
@@ -34,9 +34,24 @@ Vec2 Vec2::operator+(const Vec2 &&a) const {
     return Vec2(a.x + x, a.y + y);
 }
 
-
 Vec2 Vec2::operator-(const Vec2 &a) const {
-    return Vec2(a.x - x, a.y - y);
+    return Vec2(x - a.x, y - a.y);
+}
+
+Vec2 Vec2::operator-(const Vec2 &&a) const {
+    return Vec2(x + a.x, y + a. y);
+}
+
+Vec2& Vec2::operator+=(const Vec2 &a) {
+    x += a.x;
+    y += a.y;
+    return *this;
+}
+
+Vec2& Vec2::operator+=(const Vec2 &&a) {
+    x += a.x;
+    y += a.y;
+    return *this;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec2& a) {
