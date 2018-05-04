@@ -13,6 +13,7 @@ public:
     void Update(float dt);
     void Render();
     bool Is(std::string type);
+    std::string Type();
 };
 
 #endif /* CAMERAFOLLOWER_H */

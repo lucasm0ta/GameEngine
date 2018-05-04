@@ -135,6 +135,7 @@ Game &Game::GetInstance() {
 void Game::Run() {
 	if (hasStarted){
 		state = new State();
+		state->Start();
 	    while (!state->QuitRequested()) {
 			CalculateDeltaTime();
 			float dt = GetDeltaTime();

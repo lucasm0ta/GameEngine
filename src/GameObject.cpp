@@ -5,7 +5,7 @@
 #include "../include/Component.h"
 #include "../include/GameObject.h"
 
-GameObject::GameObject() : isDead(false) {
+GameObject::GameObject() : isDead(false), started(false) {
 }
 
 GameObject::~GameObject() {
@@ -41,8 +41,11 @@ void GameObject::RequestDelete() {
 }
 
 void GameObject::AddComponent(Component *cpt) {
+    std::cout<<"AddCmp"<<std::endl;
     components.push_back(cpt);
-    //std::cout<<"AddCmp isDead:"<<((isDead)?"True":"False")<<std::endl;
+    if (started) {
+        cpt->Start();
+    }
 }
 
 void GameObject::RemoveComponent(Component *cpt) {
@@ -66,4 +69,13 @@ Component *GameObject::GetComponent(std::string type) {
     }
     //std::cout<<"GetCmp isDead:"<<((isDead)?"True":"False")<<std::endl;
     return nullptr;
+}
+
+void GameObject::Start() {
+    std::cout<<"Started:"<<components.size()<<std::endl;
+    for (Component *cmp : components) {
+        std::cout<<"Starting: Type="<<cmp->Type()<<std::endl;
+        cmp->Start();
+    }
+    std::cout<<"End"<<std::endl;
 }

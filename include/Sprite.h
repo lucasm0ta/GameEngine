@@ -16,6 +16,7 @@ public:
     int GetWidth();
 
     bool Is(std::string type);
+    std::string Type();
     bool IsOpen();
     void Open(std::string file);
     void Render();

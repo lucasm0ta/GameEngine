@@ -5,7 +5,7 @@
 
 TileMap::TileMap (GameObject& associated, std::string file, TileSet *tileSet) :
     Component(associated), tileSet(tileSet) {
-
+    Start();
     Load(file);
 }
 
@@ -14,6 +14,10 @@ TileMap::~TileMap() {
 
 bool TileMap::Is(std::string type) {
     return type == "TileMap";
+}
+
+std::string TileMap::Type() {
+    return "TileMap";
 }
 
 void TileMap::Update(float dt) {
@@ -54,7 +58,7 @@ int TileMap::At(int x, int y, int z) {
 void TileMap::Render() {
     Vec2 pos = Camera::pos;
     for (int i = 0; i < mapDepth; i++) {
-        RenderLayer(i, pos.x, pos.y);
+        RenderLayer(i, pos.GetX(), pos.GetY());
     }
 }
 

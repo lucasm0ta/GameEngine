@@ -11,16 +11,21 @@ public:
     static float EuclidianDist(const Vec2 &a, const Vec2 &b);
     static float ManhattamDist(const Vec2 &a, const Vec2 &b);
 
+    float GetX() const;
+    float GetY() const;
+
     Vec2 operator+(const Vec2 &a) const;
     Vec2 operator+(const Vec2 &&a) const;
     Vec2 operator-(const Vec2 &a) const;
     Vec2 operator-(const Vec2 &&a) const;
+    Vec2 operator-() const;
 
     Vec2& operator=(const Vec2 &a) = default;
     Vec2& operator+=(const Vec2 &a);
     Vec2& operator+=(const Vec2 &&a);
     friend std::ostream& operator<<(std::ostream& os, const Vec2& a);
 
+private:
     float x;
     float y;
 };

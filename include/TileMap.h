@@ -14,6 +14,7 @@ public:
     void SetTileSet(TileSet *tileSet);
     int At(int x, int y, int z = 0);
     bool Is(std::string type);
+    std::string Type();
     void Update(float dt);
     void Render();
     void RenderLayer(int layer, int cameraX = 0, int cameraY = 0);

@@ -7,8 +7,7 @@ CameraFollower::CameraFollower(GameObject &go) : Component(go) {
 
 void CameraFollower::Update(float) {
     Vec2 pos = Camera::pos;
-    associated.box.x = -pos.x;
-    associated.box.y = -pos.y;
+    associated.box.SetOrigin(-pos);
 }
 
 void CameraFollower::Render() {
@@ -16,4 +15,8 @@ void CameraFollower::Render() {
 
 bool CameraFollower::Is(std::string type) {
     return type == "CameraFollower";
+}
+
+std::string CameraFollower::Type() {
+    return "Sprite";
 }

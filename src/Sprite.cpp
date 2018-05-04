@@ -28,6 +28,10 @@ bool Sprite::Is(std::string type) {
     return type == "Sprite";
 }
 
+std::string Sprite::Type() {
+    return "Sprite";
+}
+
 bool Sprite::IsOpen() {
     return (texture != nullptr);
 }
@@ -48,8 +52,8 @@ void Sprite::Open(std::string file) {
 void Sprite::Render() {
     SDL_Rect dstRect;
     Vec2 pos = Camera::pos;
-    dstRect.x = associated.box.x + pos.x;
-    dstRect.y = associated.box.y + pos.y;
+    dstRect.x = associated.box.GetX() + pos.GetX();
+    dstRect.y = associated.box.GetY() + pos.GetY();
     dstRect.w = clipRect.w;
     dstRect.h = clipRect.h;
 

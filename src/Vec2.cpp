@@ -26,6 +26,14 @@ float Vec2::ManhattamDist(const Vec2 &a, const Vec2 &b) {
     return std::abs(a.x-b.x) + std::abs(a.y-b.y);
 }
 
+float Vec2::GetX() const {
+    return x;
+}
+
+float Vec2::GetY() const {
+    return y;
+}
+
 Vec2 Vec2::operator+(const Vec2 &a) const {
     return Vec2(a.x + x, a.y + y);
 }
@@ -39,7 +47,11 @@ Vec2 Vec2::operator-(const Vec2 &a) const {
 }
 
 Vec2 Vec2::operator-(const Vec2 &&a) const {
-    return Vec2(x + a.x, y + a. y);
+    return Vec2(x - a.x, y - a. y);
+}
+
+Vec2 Vec2::operator-() const {
+    return Vec2(-x, -y);
 }
 
 Vec2& Vec2::operator+=(const Vec2 &a) {

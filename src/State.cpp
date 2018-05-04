@@ -13,34 +13,29 @@
 
 #define PI 3.14159
 
-State::State() : quitRequested(false), randGen(randDevice()) {
+State::State() : quitRequested(false), randGen(randDevice()), started(false) {
     Music mus("./assets/audio/stageState.ogg");
     mus.Play();
 
-    objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
-    std::unique_ptr<GameObject> &bgObj = objectArray.back();
+    objectArray.push_back(std::shared_ptr<GameObject>(new GameObject()));
+    std::shared_ptr<GameObject> &bgObj = objectArray.back();
 
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
-    bgObj->box.x = 0;
-    bgObj->box.y = 0;
+    bgObj->box.SetOrigin(0, 0);
 
-    bgObj->box.w = 1024;
-    bgObj->box.h = 600;
+    bgObj->box.SetOrigin(1024, 600);
     Sprite *spr = new Sprite(*bgObj, "./assets/img/ocean.jpg");
     bgObj->AddComponent(spr);
 
     CameraFollower *follower = new CameraFollower(*bgObj);
     bgObj->AddComponent(follower);
 
-    objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
-    std::unique_ptr<GameObject> &obj = objectArray.back();
+    objectArray.push_back(std::shared_ptr<GameObject>(new GameObject()));
+    std::shared_ptr<GameObject> &obj = objectArray.back();
 
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
-    obj->box.x = 0;
-    obj->box.y = 0;
-
-    obj->box.w = 1024;
-    obj->box.h = 600;
+    bgObj->box.SetOrigin(0, 0);
+    bgObj->box.SetOrigin(1024, 600);
 
     TileSet *set = new TileSet(*obj, "./assets/img/tileset.png", 64, 64);
     TileMap *tileMap = new TileMap(*obj, "./assets/map/tileMap.txt", set);
@@ -116,9 +111,9 @@ void State::Update(float dt) {
         std::uniform_int_distribution<int> intDist(1, 200);
         auto randVec = Vec2(intDist(randGen), 0).GetRotated(PI*(realDist(randGen)));
         Vec2 mousePos = Vec2(mouseX, mouseY);
-        Vec2 objPos = randVec + mousePos - camPos;
+        Vec2 objPos = mousePos + randVec - camPos;
         // std::cout<<"Criou :"<<objPos<<" = "<<mousePos<<' '<<camPos<<std::endl;
-        AddObject((int)objPos.x, (int)objPos.y);
+        // AddObject((int)objPos.GetX(), (int)objPos.GetY());
     }
 
     //std::cout<<"Size:"<<objectArray.size()<<std::endl;
@@ -139,14 +134,14 @@ void State::Update(float dt) {
     }
 }
 
-void State::AddObject(int mouseX, int mouseY) {
-    objectArray.push_back(std::unique_ptr<GameObject>(new GameObject()));
+std::weak_ptr<GameObject> State::AddObject(GameObject *go) {
+    std::shared_ptr<GameObject> obj(go);
+    objectArray.push_back(obj);
     //std::cerr <<"Mouse = ("<<mouseX<<','<<mouseY<<')'<<std::endl;
     //std::cerr <<"Size: "<<objectArray.size()<<std::endl;
-    std::unique_ptr<GameObject> &obj = objectArray.back();
 
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
-    obj->box.x = mouseX;
+    /*obj->box.x = mouseX;
     obj->box.y = mouseY;
 
     obj->box.w = 200;
@@ -159,5 +154,24 @@ void State::AddObject(int mouseX, int mouseY) {
     obj->AddComponent(sound);
 
     Face *face = new Face(*obj);
-    obj->AddComponent(face);
+    obj->AddComponent(face);*/
+    if (started) {
+        obj->Start();
+    }
+    return obj;
+}
+std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) {
+    for (unsigned int i = 0; i < objectArray.size(); i++) {
+        if (go == objectArray[i].get()){
+            return objectArray[i];
+        }
+    }
+    return std::weak_ptr<GameObject>();
+}
+void State::Start() {
+    LoadAssets();
+    for (unsigned int i = 0; i < objectArray.size(); i++) {
+        objectArray[i]->Start();
+    }
+    started = true;
 }
