@@ -25,7 +25,7 @@ private:
             MOVE = 0,
             SHOOT
         };
-        Action(ActionType actionType, float x, float y);
+        Action(Alien::Action::ActionType actionType, float x, float y);
         ActionType type;
         Vec2 pos;
     };

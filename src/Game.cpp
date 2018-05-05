@@ -110,6 +110,7 @@ Game::Game(std::string title, int width, int height){
 	hasStarted = true;
 	dt = 0;
 	frameStart = 0;
+	std::cout<<"Iniciou"<<std::endl;
 }
 
 Game::~Game() {

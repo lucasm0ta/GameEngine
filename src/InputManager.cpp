@@ -7,11 +7,9 @@ InputManager& InputManager::GetInstance() {
 }
 
 InputManager::InputManager () {
-
 }
 
 InputManager::~InputManager() {
-
 }
 
 void InputManager::Update(float) {

@@ -40,6 +40,7 @@ State::State() : quitRequested(false), randGen(randDevice()), started(false) {
     TileSet *set = new TileSet(*obj, "./assets/img/tileset.png", 64, 64);
     TileMap *tileMap = new TileMap(*obj, "./assets/map/tileMap.txt", set);
     obj->AddComponent(tileMap);
+    std::cerr << "Criou State"<<std::endl;
 }
 
 State::~State() {
@@ -155,9 +156,9 @@ std::weak_ptr<GameObject> State::AddObject(GameObject *go) {
 
     Face *face = new Face(*obj);
     obj->AddComponent(face);*/
-    if (started) {
+    /*if (started) {
         obj->Start();
-    }
+    }*/
     return obj;
 }
 std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) {
@@ -170,8 +171,8 @@ std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) {
 }
 void State::Start() {
     LoadAssets();
-    for (unsigned int i = 0; i < objectArray.size(); i++) {
+    /*for (unsigned int i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Start();
     }
-    started = true;
+    started = true;*/
 }

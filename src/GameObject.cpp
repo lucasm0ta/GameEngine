@@ -72,10 +72,7 @@ Component *GameObject::GetComponent(std::string type) {
 }
 
 void GameObject::Start() {
-    std::cout<<"Started:"<<components.size()<<std::endl;
-    for (Component *cmp : components) {
-        std::cout<<"Starting: Type="<<cmp->Type()<<std::endl;
+    /*for (Component *cmp : components) {
         cmp->Start();
-    }
-    std::cout<<"End"<<std::endl;
+    }*/
 }
