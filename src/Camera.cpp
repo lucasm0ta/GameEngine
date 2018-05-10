@@ -13,6 +13,6 @@ void Camera::Unfollow() {
 
 void Camera::Update(float dt) {
     if (Camera::focus) {
-        
+
     }
 }

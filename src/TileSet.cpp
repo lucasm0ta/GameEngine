@@ -8,6 +8,7 @@ TileSet::TileSet (GameObject& associated, std::string file, int tileWidth,
     if (tileSet.IsOpen()) {
         columns = tileSet.GetWidth() / tileWidth;
         rows = tileSet.GetHeight() / tileWidth;
+        // std::cerr << "ROWS/COLS"<< columns<<' '<<rows<< std::endl;
     }
 }
 

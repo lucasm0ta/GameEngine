@@ -23,6 +23,7 @@ public:
     void Start();
 
     Rect box;
+    float angle;
 
 private:
     std::vector<Component*> components;

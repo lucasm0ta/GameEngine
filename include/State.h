@@ -9,6 +9,9 @@
 #include <memory>
 #include <random>
 
+#define PI 3.14159
+#define CAMERA_SPEED 100
+
 class State {
 public:
     State();
@@ -19,7 +22,7 @@ public:
     void Update(float dt);
     void Render();
     void Start();
-    std::weak_ptr<GameObject> AddObject(GameObject* go);
+    std::weak_ptr<GameObject> AddObject(std::weak_ptr<GameObject> go);
     std::weak_ptr<GameObject> GetObjectPtr(GameObject* go);
 
 private:

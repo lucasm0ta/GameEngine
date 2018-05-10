@@ -6,19 +6,23 @@
 class Vec2 {
 public:
     Vec2 (float x, float y);
-    Vec2& GetRotated(float rad);
+    void Rotate(float rad);
     float Mag() const;
+    void SetMag(float mag);
     static float EuclidianDist(const Vec2 &a, const Vec2 &b);
     static float ManhattamDist(const Vec2 &a, const Vec2 &b);
+    static float Angle(const Vec2 &a, const Vec2 &b);
 
     float GetX() const;
     float GetY() const;
+    void Set(float x, float y);
 
     Vec2 operator+(const Vec2 &a) const;
     Vec2 operator+(const Vec2 &&a) const;
     Vec2 operator-(const Vec2 &a) const;
     Vec2 operator-(const Vec2 &&a) const;
     Vec2 operator-() const;
+    Vec2 operator*(float f) const;
 
     Vec2& operator=(const Vec2 &a) = default;
     Vec2& operator+=(const Vec2 &a);

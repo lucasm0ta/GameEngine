@@ -107,10 +107,12 @@ Game::Game(std::string title, int width, int height){
 		return;
 	}
 	srand(time(NULL));
+	SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
 	hasStarted = true;
 	dt = 0;
 	frameStart = 0;
 	std::cout<<"Iniciou"<<std::endl;
+
 }
 
 Game::~Game() {
@@ -158,6 +160,6 @@ float Game::GetDeltaTime() {
 
 void Game::CalculateDeltaTime() {
 	int current = SDL_GetTicks();
-	dt = std::abs(frameStart - current)/5;
+	dt = std::abs(frameStart - current)/1000.0;
 	frameStart = current;
 }

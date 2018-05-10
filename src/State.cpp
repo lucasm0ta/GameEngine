@@ -2,8 +2,8 @@
 #include <memory>
 #include <cmath>
 
+#include "../include/Alien.h"
 #include "../include/State.h"
-#include "../include/Face.h"
 #include "../include/Sound.h"
 #include "../include/TileMap.h"
 #include "../include/TileSet.h"
@@ -11,14 +11,12 @@
 #include "../include/Camera.h"
 #include "../include/CameraFollower.h"
 
-#define PI 3.14159
-
 State::State() : quitRequested(false), randGen(randDevice()), started(false) {
     Music mus("./assets/audio/stageState.ogg");
     mus.Play();
 
-    objectArray.push_back(std::shared_ptr<GameObject>(new GameObject()));
-    std::shared_ptr<GameObject> &bgObj = objectArray.back();
+    auto bgObj = std::make_shared<GameObject>();
+    objectArray.push_back(bgObj);
 
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
     bgObj->box.SetOrigin(0, 0);
@@ -30,17 +28,24 @@ State::State() : quitRequested(false), randGen(randDevice()), started(false) {
     CameraFollower *follower = new CameraFollower(*bgObj);
     bgObj->AddComponent(follower);
 
-    objectArray.push_back(std::shared_ptr<GameObject>(new GameObject()));
-    std::shared_ptr<GameObject> &obj = objectArray.back();
-
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
     bgObj->box.SetOrigin(0, 0);
-    bgObj->box.SetOrigin(1024, 600);
+    bgObj->box.SetSize(1024, 600);
+
+    auto obj = std::make_shared<GameObject>();
+    objectArray.push_back(obj);
 
     TileSet *set = new TileSet(*obj, "./assets/img/tileset.png", 64, 64);
     TileMap *tileMap = new TileMap(*obj, "./assets/map/tileMap.txt", set);
     obj->AddComponent(tileMap);
-    std::cerr << "Criou State"<<std::endl;
+
+    auto alienObj = std::make_shared<GameObject>();
+    objectArray.push_back(alienObj);
+
+    alienObj->box.SetOrigin(512, 300);
+
+    Alien *alien = new Alien(*alienObj, 5);
+    alienObj->AddComponent(alien);
 }
 
 State::~State() {
@@ -62,12 +67,10 @@ void State::Render() {
 }
 
 void State::Update(float dt) {
+    float speed = dt * CAMERA_SPEED;
     Camera::Update(dt);
 
     InputManager &inp = InputManager::GetInstance();
-    float mouseX, mouseY;
-    mouseX = inp.GetMouseX();
-    mouseY = inp.GetMouseY();
     if (inp.KeyPress(ESCAPE_KEY) || inp.QuitRequested()) {
         quitRequested = true;
         // std::cout<<"GOOD ";
@@ -75,7 +78,7 @@ void State::Update(float dt) {
         // std::cout<<"BAD ";
     }
     if (inp.MousePress(LEFT_MOUSE_BUTTON)) {
-    	for (int i = objectArray.size() - 1; i >= 0; --i) {
+    	/*for (int i = objectArray.size() - 1; i >= 0; --i) {
             GameObject* go = (GameObject*) objectArray[i].get();
 
             if (go->box.Contains((float)mouseX, (float)mouseY)) {
@@ -90,24 +93,23 @@ void State::Update(float dt) {
                     break;
                 }
             }
-    	}
+    	}*/
     }
     if (inp.IsKeyDown(LEFT_ARROW_KEY)) {
-        // std::cout<<"leffft\n";
-        Camera::pos += Vec2(dt, 0);
-        // std::cout<<"CamPos:"<<Camera::pos<<" dt:"<<dt<<std::endl;
+        Camera::pos += Vec2(speed, 0);
+        // std::cout<<"CamPos:"<<Camera::pos<<" speed:"<<speed<<std::endl;
     }
     if (inp.IsKeyDown(RIGHT_ARROW_KEY)) {
-        Camera::pos += Vec2(-dt, 0);
+        Camera::pos += Vec2(-speed, 0);
     }
     if (inp.IsKeyDown(UP_ARROW_KEY)) {
-        Camera::pos += Vec2(0, dt);
+        Camera::pos += Vec2(0, speed);
     }
     if (inp.IsKeyDown(DOWN_ARROW_KEY)) {
-        Camera::pos += Vec2(0, -dt);
+        Camera::pos += Vec2(0, -speed);
     }
     if (inp.KeyPress(SPACE_KEY)) {
-        Vec2 camPos = Camera::pos;
+        /*Vec2 camPos = Camera::pos;
         std::uniform_real_distribution<float> realDist(0, 2);
         std::uniform_int_distribution<int> intDist(1, 200);
         auto randVec = Vec2(intDist(randGen), 0).GetRotated(PI*(realDist(randGen)));
@@ -115,6 +117,7 @@ void State::Update(float dt) {
         Vec2 objPos = mousePos + randVec - camPos;
         // std::cout<<"Criou :"<<objPos<<" = "<<mousePos<<' '<<camPos<<std::endl;
         // AddObject((int)objPos.GetX(), (int)objPos.GetY());
+        */
     }
 
     //std::cout<<"Size:"<<objectArray.size()<<std::endl;
@@ -135,9 +138,16 @@ void State::Update(float dt) {
     }
 }
 
-std::weak_ptr<GameObject> State::AddObject(GameObject *go) {
-    std::shared_ptr<GameObject> obj(go);
-    objectArray.push_back(obj);
+std::weak_ptr<GameObject> State::AddObject(std::weak_ptr<GameObject> go) {
+    auto shared = go.lock();
+    if (shared != nullptr) {
+        objectArray.push_back(shared);
+        if (started) {
+            shared->Start();
+        }
+    } else {
+        std::cerr <<"Added bad OBJ"<<std::endl;
+    }
     //std::cerr <<"Mouse = ("<<mouseX<<','<<mouseY<<')'<<std::endl;
     //std::cerr <<"Size: "<<objectArray.size()<<std::endl;
 
@@ -159,7 +169,7 @@ std::weak_ptr<GameObject> State::AddObject(GameObject *go) {
     /*if (started) {
         obj->Start();
     }*/
-    return obj;
+    return go;
 }
 std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) {
     for (unsigned int i = 0; i < objectArray.size(); i++) {
@@ -171,8 +181,9 @@ std::weak_ptr<GameObject> State::GetObjectPtr(GameObject* go) {
 }
 void State::Start() {
     LoadAssets();
-    /*for (unsigned int i = 0; i < objectArray.size(); i++) {
+    for (unsigned int i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Start();
+        // std::cout<<"STARTED!:"<<i<<std::endl;
     }
-    started = true;*/
+    started = true;
 }

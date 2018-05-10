@@ -6,7 +6,8 @@
 #include <iostream>
 #include <SDL2/SDL_image.h>
 
-Sprite::Sprite(GameObject &associated) : Component(associated), texture(nullptr){
+Sprite::Sprite(GameObject &associated) : Component(associated), texture(nullptr), scale(1, 1) {
+
 }
 
 Sprite::Sprite(GameObject &associated, std::string file) : Sprite(associated) {
@@ -17,11 +18,13 @@ Sprite::~Sprite() {
 }
 
 int Sprite::GetWidth() {
-    return width;
+    // std::cerr << "Factor X:"<< scale.GetX()<< std::endl;
+    return width*scale.GetX();
 }
 
 int Sprite::GetHeight() {
-    return height;
+    // std::cerr << "Factor Y:"<< scale.GetY()<< std::endl;
+    return height*scale.GetY();
 }
 
 bool Sprite::Is(std::string type) {
@@ -51,17 +54,19 @@ void Sprite::Open(std::string file) {
 
 void Sprite::Render() {
     SDL_Rect dstRect;
-    Vec2 pos = Camera::pos;
-    dstRect.x = associated.box.GetX() + pos.GetX();
-    dstRect.y = associated.box.GetY() + pos.GetY();
-    dstRect.w = clipRect.w;
-    dstRect.h = clipRect.h;
+    Vec2 camPos = Camera::pos;
+    // std::cout <<'('<< associated.box.GetX() + camPos.GetX()<<','<<associated.box.GetY() + camPos.GetY()<<')'<<std::endl;
+    dstRect.x = associated.box.GetX() + camPos.GetX();
+    dstRect.y = associated.box.GetY() + camPos.GetY();
+    dstRect.w = clipRect.w*scale.GetX();
+    dstRect.h = clipRect.h*scale.GetY();
 
     // std::cout<<"Render at ("<<dstRect.x<<','<<dstRect.y<<')'<<std::endl;
     if (texture == nullptr) {
         std::cerr << "Error Sprite: Trying to render null texture." <<std::endl;
     }
-    SDL_RenderCopy(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect);
+
+    SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect, associated.angle*180/PI, nullptr, SDL_FLIP_NONE);
 }
 
 void Sprite::Render(float x, float y) {
@@ -69,12 +74,12 @@ void Sprite::Render(float x, float y) {
 
     dstRect.x = x;
     dstRect.y = y;
-    dstRect.w = clipRect.w;
-    dstRect.h = clipRect.h;
+    dstRect.w = clipRect.w*scale.GetX();
+    dstRect.h = clipRect.h*scale.GetY();
     if (texture == nullptr) {
         std::cerr << "Error Sprite: Trying to render null texture." <<std::endl;
     }
-    SDL_RenderCopy(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect);
+    SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect, associated.angle*180/PI, nullptr, SDL_FLIP_NONE);
 }
 
 void Sprite::SetClip(int x, int y, int w, int h) {
@@ -82,6 +87,23 @@ void Sprite::SetClip(int x, int y, int w, int h) {
     clipRect.y = y;
     clipRect.h = h;
     clipRect.w = w;
+}
+
+void Sprite::SetClip(Rect rec) {
+    clipRect.x = rec.GetX();
+    clipRect.y = rec.GetY();
+    clipRect.h = rec.GetH();
+    clipRect.w = rec.GetW();
+}
+
+void Sprite::SetScale (float scaleX, float scaleY) {
+    if (scaleX != 0 && scaleY != 0) {
+        scale.Set(scaleX, scaleY);
+    }
+}
+
+Vec2 Sprite::GetScale() {
+    return scale;
 }
 
 void Sprite::Update(float) {

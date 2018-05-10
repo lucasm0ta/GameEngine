@@ -8,6 +8,8 @@
 #include <queue>
 #include <memory>
 
+#define SPEED 5.0
+
 class Alien : public Component {
 public:
     Alien(GameObject &associated, int nMinions);
@@ -17,6 +19,7 @@ public:
     void Update(float dt);
     void Render();
     bool Is(std::string type);
+    std::string Type();
 
 private:
     class Action {
@@ -25,11 +28,11 @@ private:
             MOVE = 0,
             SHOOT
         };
-        Action(Alien::Action::ActionType actionType, float x, float y);
+        Action(Alien::Action::ActionType actionType, Vec2 pos);
         ActionType type;
         Vec2 pos;
     };
-
+    int nMinions;
     Vec2 speed;
     int hp;
     std::queue<Action> taskQueue;

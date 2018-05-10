@@ -5,7 +5,7 @@
 #include "../include/Component.h"
 #include "../include/GameObject.h"
 
-GameObject::GameObject() : isDead(false), started(false) {
+GameObject::GameObject() : angle(0), isDead(false), started(false) {
 }
 
 GameObject::~GameObject() {
@@ -41,7 +41,7 @@ void GameObject::RequestDelete() {
 }
 
 void GameObject::AddComponent(Component *cpt) {
-    std::cout<<"AddCmp"<<std::endl;
+    std::cout<<"AddCmp "<< cpt <<std::endl;
     components.push_back(cpt);
     if (started) {
         cpt->Start();
@@ -72,7 +72,11 @@ Component *GameObject::GetComponent(std::string type) {
 }
 
 void GameObject::Start() {
-    /*for (Component *cmp : components) {
-        cmp->Start();
-    }*/
+    for (auto cmp : components) {
+        if (cmp != nullptr) {
+            cmp->Start();
+        } else {
+            std::cout<<"BAD COMPONENT"<<std::endl;
+        }
+    }
 }

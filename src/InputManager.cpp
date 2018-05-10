@@ -25,10 +25,12 @@ void InputManager::Update(float) {
 			quitRequested = true;
 		}
 		if(event.type == SDL_MOUSEBUTTONUP) {
+            // if (event.button.button == RIGHT_MOUSE_BUTTON) std::cout<<"MOVE UP"<<std::endl;
             mouseUpdate[event.button.button] = updateCounter;
             mouseState[event.button.button] = false;
         }
 		if(event.type == SDL_MOUSEBUTTONDOWN) {
+            // if (event.button.button == RIGHT_MOUSE_BUTTON) std::cout<<"MOVE DOWN"<<std::endl;
             if (!mouseState[event.button.button]){
                 mouseUpdate[event.button.button] = updateCounter;
                 mouseState[event.button.button] = true;
@@ -66,6 +68,7 @@ bool InputManager::IsKeyDown(int key) {
 }
 
 bool InputManager::MousePress(int button) {
+    // if (button == RIGHT_MOUSE_BUTTON) std::cout<<"CHECK"<<std::endl;
     return (mouseState[button] && mouseUpdate[button] == updateCounter);
 }
 

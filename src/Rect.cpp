@@ -16,14 +16,22 @@ Vec2 Rect::Center() const {
     return Vec2(x+w/2, y + h/2);
 }
 
-void Rect::Shift(float dx, float dy) {
-    x += dx;
-    y += dy;
+Vec2 Rect::Origin() const {
+    return Vec2(x, y);
 }
 
 void Rect::Shift(Vec2 v) {
-    x += v.GetX();
-    y += v.GetY();
+    Shift(v.GetX(), v.GetY());
+    // std::cout<<"POS:"<< Center() <<std::endl;
+}
+
+void Rect::Shift(float _x, float _y) {
+    x += _x;
+    y += _y;
+}
+
+void Rect::SetOrigin(Vec2 vec)  {
+    SetOrigin(vec.GetX(), vec.GetY());
 }
 
 void Rect::SetOrigin(float _x, float _y)  {
@@ -31,10 +39,26 @@ void Rect::SetOrigin(float _x, float _y)  {
     y = _y;
 }
 
-void Rect::SetOrigin(Vec2 vec)  {
-    x = vec.GetX();
-    y = vec.GetY();
+void Rect::SetCenter(Vec2 vec)  {
+    SetCenter(vec.GetX(), vec.GetY());
 }
+
+void Rect::SetCenter(float _x, float _y)  {
+    x = _x - w/2;
+    y = _y - h/2;
+}
+
+void Rect::SetSize(float _w, float _h)  {
+    h = _h;
+    w = _w;
+}
+
+void Rect::SetClip(float _x, float _y, float _w, float _h) {
+    x = _x;
+    y = _y;
+    w = _x;
+    h = _h;
+ }
 
 float Rect::GetX() const {
     return x;
@@ -42,6 +66,14 @@ float Rect::GetX() const {
 
 float Rect::GetY() const {
     return y;
+}
+
+float Rect::GetH() const {
+    return h;
+}
+
+float Rect::GetW() const {
+    return w;
 }
 
 float CenterDist(const Rect &a, const Rect &b) {

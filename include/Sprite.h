@@ -5,6 +5,7 @@
 
 #include "Component.h"
 #include "GameObject.h"
+#include "Rect.h"
 
 class Sprite : public Component {
 public:
@@ -21,14 +22,19 @@ public:
     void Open(std::string file);
     void Render();
     void Render(float x, float y);
-    void SetClip(int x, int y, int w, int h);
     void Update(float dt);
+
+    void SetClip(int x, int y, int w, int h);
+    void SetClip(Rect rec);
+    void SetScale(float scaleX, float scaleY);
+    Vec2 GetScale();
 
 private:
     SDL_Texture *texture;
     int width;
     int height;
     SDL_Rect clipRect;
+    Vec2 scale;
 };
 
 #endif /* SPRITE_H */
