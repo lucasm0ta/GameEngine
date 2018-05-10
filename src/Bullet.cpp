@@ -6,7 +6,7 @@ Bullet::Bullet(GameObject &associated, float angle, float speed, int damage,
     speed(speed, 0), distanceLeft(maxDistance), damage(damage) {
 
     this->speed.Rotate(angle);
-    Sprite *spr =  new Sprite(associated, "./assets/img/minionbullet1.png");
+    Sprite *spr =  new Sprite(associated, "./assets/img/minionbullet2.png", 3, 100);
     associated.box.SetSize(spr->GetWidth(), spr->GetHeight());
     associated.AddComponent(spr);
     associated.angle = angle;

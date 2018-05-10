@@ -45,7 +45,10 @@ void Minion::Shoot(Vec2 pos) {
 
     auto bulletObj = std::make_shared<GameObject>();
     float angle = Vec2::Angle(associated.box.Center(), pos);
-    Bullet *bullet = new Bullet(*bulletObj, angle, 500, 30, 2080);
+    float speed = 200;
+    int damage = 30;
+    float maxDistance = 2080;
+    Bullet *bullet = new Bullet(*bulletObj, angle, speed, damage, maxDistance);
     bulletObj->box.SetCenter(associated.box.Center());
     bulletObj->AddComponent(bullet);
     state.AddObject(bulletObj);

@@ -6,11 +6,14 @@
 #include <iostream>
 #include <SDL2/SDL_image.h>
 
-Sprite::Sprite(GameObject &associated) : Component(associated), texture(nullptr), scale(1, 1) {
+Sprite::Sprite(GameObject &associated, int frameCount, float frameTime) :
+    Component(associated), texture(nullptr), scale(1, 1), frameCount(frameCount),
+    frameTime(frameTime) {
 
 }
 
-Sprite::Sprite(GameObject &associated, std::string file) : Sprite(associated) {
+Sprite::Sprite(GameObject &associated, std::string file, int frameCount,
+    float frameTime) : Sprite(associated, frameCount, frameTime) {
     Open(file);
 }
 
@@ -48,25 +51,15 @@ void Sprite::Open(std::string file) {
         return;
     }
     height = h;
-    width = w;
-    SetClip(0, 0, w, h);
+    width = w / frameCount;
+    SetClip(0, 0, width, height);
 }
 
 void Sprite::Render() {
-    SDL_Rect dstRect;
     Vec2 camPos = Camera::pos;
     // std::cout <<'('<< associated.box.GetX() + camPos.GetX()<<','<<associated.box.GetY() + camPos.GetY()<<')'<<std::endl;
-    dstRect.x = associated.box.GetX() + camPos.GetX();
-    dstRect.y = associated.box.GetY() + camPos.GetY();
-    dstRect.w = clipRect.w*scale.GetX();
-    dstRect.h = clipRect.h*scale.GetY();
+    Render(associated.box.GetX() + camPos.GetX(), associated.box.GetY() + camPos.GetY());
 
-    // std::cout<<"Render at ("<<dstRect.x<<','<<dstRect.y<<')'<<std::endl;
-    if (texture == nullptr) {
-        std::cerr << "Error Sprite: Trying to render null texture." <<std::endl;
-    }
-
-    SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect, associated.angle*180/PI, nullptr, SDL_FLIP_NONE);
 }
 
 void Sprite::Render(float x, float y) {
@@ -74,12 +67,13 @@ void Sprite::Render(float x, float y) {
 
     dstRect.x = x;
     dstRect.y = y;
-    dstRect.w = clipRect.w*scale.GetX();
-    dstRect.h = clipRect.h*scale.GetY();
+    dstRect.w = clipRect.w * scale.GetX();
+    dstRect.h = clipRect.h * scale.GetY();
     if (texture == nullptr) {
         std::cerr << "Error Sprite: Trying to render null texture." <<std::endl;
     }
-    SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect, associated.angle*180/PI, nullptr, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(Game::GetInstance().GetRenderer(), texture, &clipRect, &dstRect, associated.angle*180/PI,
+        nullptr, SDL_FLIP_NONE);
 }
 
 void Sprite::SetClip(int x, int y, int w, int h) {
@@ -106,5 +100,10 @@ Vec2 Sprite::GetScale() {
     return scale;
 }
 
-void Sprite::Update(float) {
+void Sprite::Update(float dt) {
+
+    timeElapsed += dt*1000;
+    long frame = static_cast<long>(std::floor(timeElapsed/frameTime));
+    // if (frameCount == 3) std::cout<<"Elapsed:"<<timeElapsed<<" dt:"<<dt<<" Frame:"<<frame<<std::endl;
+    clipRect.x = (frame%frameCount)*width;
 }
