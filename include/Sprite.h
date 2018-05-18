@@ -6,11 +6,13 @@
 #include "Component.h"
 #include "GameObject.h"
 #include "Rect.h"
+#include "Timer.h"
 
 class Sprite : public Component {
 public:
-    Sprite(GameObject &associated, int frameCount = 1, float frameTime = 1);
-    Sprite(GameObject &associated, std::string file, int frameCount = 1, float frameTime = 1);
+    Sprite(GameObject &associated, int frameCount = 1, float frameTime = 1, float secondsToSelfDestruct = 0);
+    Sprite(GameObject &associated, std::string file, int frameCount = 1, float frameTime = 1,
+        float secondsToSelfDestruct = 0);
     ~Sprite();
 
     int GetHeight();
@@ -41,8 +43,9 @@ private:
     Vec2 scale;
     int frameCount;
     int currentFrame;
-    float timeElapsed;
     float frameTime;
+    float secondsToSelfDestruct;
+    Timer timer;
 };
 
 #endif /* SPRITE_H */

@@ -2,6 +2,8 @@
 #include "../include/Sprite.h"
 #include "../include/Bullet.h"
 #include "../include/Game.h"
+#include "../include/Sound.h"
+#include "../include/Collider.h"
 
 #define RADIUS 200
 
@@ -15,9 +17,24 @@ Minion::Minion(GameObject &associated, GameObject &alienCenter,
     spr->SetScale(randVal, randVal);
     associated.box.SetSize(spr->GetWidth(), spr->GetHeight());
     associated.AddComponent(spr);
+
+    Collider *col = new Collider(associated);
+    associated.AddComponent(col);
 }
 
 Minion::~Minion() {
+    // EXPLOSION
+    auto &state = Game::GetInstance().GetState();
+    auto expObj = std::make_shared<GameObject>();
+    Sprite *expSpr = new Sprite(*expObj, "./assets/img/miniondeath.png", 4, 100, 0.4);
+    expObj->box.SetSize(expSpr->GetWidth(), expSpr->GetHeight());
+    // std::cout<<"CREATED RECT:"<<expObj->box.GetX()<<" "<<expObj->box.GetY()<<" "<<expObj->box.GetW()<<" "<<expObj->box.GetH()<<std::endl;
+    expObj->box.SetOrigin(associated.box.Origin());
+    Sound *expSnd = new Sound(*expObj, "./assets/audio/boom.wav");
+    expObj->AddComponent(expSpr);
+    expObj->AddComponent(expSnd);
+    state.AddObject(expObj);
+    expSnd->Play();
 }
 
 void Minion::Update(float dt) {
@@ -42,15 +59,24 @@ std::string Minion::Type() {
 
 void Minion::Shoot(Vec2 pos) {
     auto &state = Game::GetInstance().GetState();
-
     auto bulletObj = std::make_shared<GameObject>();
+
     float angle = Vec2::Angle(associated.box.Center(), pos);
     float speed = 200;
     int damage = 30;
     float maxDistance = 2080;
-    Bullet *bullet = new Bullet(*bulletObj, angle, speed, damage, maxDistance);
+
+    Bullet *bullet = new Bullet(*bulletObj, angle, speed, damage, maxDistance, true);
     bulletObj->box.SetCenter(associated.box.Center());
     bulletObj->AddComponent(bullet);
     state.AddObject(bulletObj);
-    std::cout<<"SHOOT"<<std::endl;
+}
+
+void Minion::NotifyCollision(GameObject &other) {
+    auto bulletComp = other.GetComponent("Bullet");
+    auto bullet = dynamic_cast<Bullet*>(bulletComp);
+    if (bulletComp != nullptr && !bullet->targetsPlayer) {
+        alienCenter.NotifyCollision(other);
+        associated.RequestDelete();
+    }
 }

@@ -4,11 +4,13 @@
 #include "Component.h"
 #include "GameObject.h"
 #include "Vec2.h"
+#include "Timer.h"
 
 #include <queue>
 #include <memory>
 
-#define SPEED 5.0
+#define ALIEN_SPEED 5.0
+#define ALIEN_WAIT 3.0
 
 class Alien : public Component {
 public:
@@ -20,22 +22,18 @@ public:
     void Render();
     bool Is(std::string type);
     std::string Type();
+    void NotifyCollision(GameObject &other);
+
+    static int alienCount;
 
 private:
-    class Action {
-    public:
-        enum ActionType {
-            MOVE = 0,
-            SHOOT
-        };
-        Action(Alien::Action::ActionType actionType, Vec2 pos);
-        ActionType type;
-        Vec2 pos;
-    };
+    enum AlienState { MOVING, RESTING };
+    AlienState state = AlienState::RESTING;
+    Timer timer;
+    Vec2 destination;
     int nMinions;
     Vec2 speed;
     int hp;
-    std::queue<Action> taskQueue;
     std::vector<std::weak_ptr<GameObject>> minionArray;
 };
 

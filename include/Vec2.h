@@ -5,8 +5,10 @@
 
 class Vec2 {
 public:
-    Vec2 (float x, float y);
+    Vec2();
+    Vec2(float x, float y);
     void Rotate(float rad);
+    Vec2 GetRotated(float rad) const;
     float Mag() const;
     void SetMag(float mag);
     static float EuclidianDist(const Vec2 &a, const Vec2 &b);
@@ -23,10 +25,15 @@ public:
     Vec2 operator-(const Vec2 &&a) const;
     Vec2 operator-() const;
     Vec2 operator*(float f) const;
+    Vec2 operator/(float f) const;
 
     Vec2& operator=(const Vec2 &a) = default;
     Vec2& operator+=(const Vec2 &a);
     Vec2& operator+=(const Vec2 &&a);
+    Vec2& operator-=(const Vec2 &a);
+    Vec2& operator-=(const Vec2 &&a);
+    Vec2& operator*=(float f);
+    bool operator==(const Vec2 &a);
     friend std::ostream& operator<<(std::ostream& os, const Vec2& a);
 
 private:

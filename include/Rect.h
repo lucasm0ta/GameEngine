@@ -21,6 +21,8 @@ public:
     void SetCenter(float x, float y);
 
     void SetSize(float w, float h);
+    void SetScale(Vec2 scale);
+    void SetScale(float w, float h);
     void SetClip(float x, float y, float w, float h);
     float GetX() const;
     float GetY() const;

@@ -3,6 +3,7 @@
 
 #include <string>
 #include "State.h"
+#include "Vec2.h"
 #include <SDL2/SDL.h>
 
 class Game {
@@ -13,6 +14,7 @@ public:
     State &GetState();
     static Game &GetInstance();
     float GetDeltaTime();
+    Vec2 GetWindowSize();
 
 private:
     Game(std::string title, int width, int height);
@@ -25,6 +27,8 @@ private:
     bool hasStarted;
     int frameStart;
     float dt;
+    int width;
+    int height;
 };
 
 #endif /* GAME_H */

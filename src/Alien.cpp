@@ -2,77 +2,102 @@
 #include "../include/Minion.h"
 #include "../include/Sprite.h"
 #include "../include/Game.h"
+#include "../include/Bullet.h"
+#include "../include/Collider.h"
 #include "../include/Camera.h"
+#include "../include/Sound.h"
+#include "../include/PenguinBody.h"
 #include "../include/InputManager.h"
 #include <iostream>
+
+int Alien::alienCount = 0;
 
 Alien::Alien(GameObject &associated, int nMinions) : Component(associated), nMinions(nMinions), speed(0, 0), hp(100) {
     Sprite *spr =  new Sprite(associated, "./assets/img/alien.png");
     associated.box.SetSize(spr->GetWidth(), spr->GetHeight());
     associated.AddComponent(spr);
+
+    Collider *col = new Collider(associated);
+    associated.AddComponent(col);
+    Alien::alienCount++;
 }
 Alien::~Alien() {
     minionArray.clear();
-}
 
-Alien::Action::Action(Alien::Action::ActionType actionType, Vec2 pos) : type(actionType), pos(pos){
+    // EXPLOSION
+    auto &state = Game::GetInstance().GetState();
+    auto expObj = std::make_shared<GameObject>();
+    Sprite *expSpr = new Sprite(*expObj, "./assets/img/aliendeath.png", 4, 100, 0.4);
+    expObj->box.SetSize(expSpr->GetWidth(), expSpr->GetHeight());
+    expObj->box.SetCenter(associated.box.Center());
+    Sound *expSnd = new Sound(*expObj, "./assets/audio/boom.wav");
+    expObj->AddComponent(expSpr);
+    expObj->AddComponent(expSnd);
+    state.AddObject(expObj);
+    expSnd->Play();
 }
 
 void Alien::Update(float dt) {
     // std::cout<<"Update GO:"<<pos<<std::endl;
     associated.angle -= dt;
-    InputManager &inp = InputManager::GetInstance();
-    Vec2 clickPos(inp.GetMouseX(), inp.GetMouseY());
-    if (inp.MousePress(LEFT_MOUSE_BUTTON)) { // SHOOT
-        Action act = Alien::Action(Action::ActionType::SHOOT, clickPos - Camera::pos);
-        taskQueue.push(act);
-        // speed = act.pos - ;
-    }
-    if (inp.MousePress(RIGHT_MOUSE_BUTTON)) { // MOVE
-        taskQueue.push(Action(Action::ActionType::MOVE, clickPos - Camera::pos));
-    }
-
-    if (!taskQueue.empty()) {
-        auto task = taskQueue.front();
-        Vec2 point = task.pos;
-        // std::cout<<"Point:"<< point <<" = "<<task.pos<<'-'<<Camera::pos<<std::endl;
-        float distance = Vec2::EuclidianDist(point, associated.box.Center());
-        Vec2 dir = point - associated.box.Center();
-        dir.SetMag(SPEED);
-        switch(task.type){
-            case(Action::ActionType::MOVE):
-                // std::cout<<"Distance :"<< distance <<std::endl;
-                if (distance < 1.09 * SPEED) {
-                    // std::cout<<"Parou"<<std::endl;
-                    associated.box.SetCenter(point);
-                    taskQueue.pop();
-                } else {
-                    // associated.box
-                    // std::cout<<"POS CENTER:"<< associated.box.Center() <<std::endl;
-                    associated.box.Shift(dir);
-                }
-            break;
-            case (Action::ActionType::SHOOT):
-                std::shared_ptr<GameObject> closest = minionArray[0].lock();
-                float distance = std::numeric_limits<float>::max();
-                for (auto auxminion : minionArray) {
-                    auto minion = auxminion.lock();
-                    if (minion != nullptr) {
-                        float auxDist = Vec2::ManhattamDist(point, minion->box.Center());
-                        if (auxDist < distance) {
-                            closest = minion;
-                            distance = auxDist;
+    if (PenguinBody::player != nullptr) { // If Player is not DEAD
+        switch (state) {
+            case AlienState::MOVING:
+                if (associated.box.Center() == destination) { // SHOOT
+                    destination = PenguinBody::player->GetBox().Center();
+                    std::shared_ptr<GameObject> closest = minionArray[0].lock();
+                    float distance = std::numeric_limits<float>::max();
+                    // Get closest minion
+                    for (auto auxminion : minionArray) {
+                        auto minion = auxminion.lock();
+                        if (minion != nullptr) {
+                            float auxDist = Vec2::ManhattamDist(destination, minion->box.Center());
+                            if (auxDist < distance) {
+                                closest = minion;
+                                distance = auxDist;
+                            }
                         }
                     }
+                    Component *minion = closest->GetComponent("Minion");
+                    if (minion != nullptr) {
+                        Minion *casted = dynamic_cast<Minion*>(minion);
+                        casted->Shoot(destination);
+                    }
+                    state = AlienState::RESTING;
+                } else { // MOVE
+                    float distance = Vec2::EuclidianDist(destination, associated.box.Center());
+                    Vec2 dir = destination - associated.box.Center();
+                    dir.SetMag(ALIEN_SPEED);
+                    if (distance < 1.09 * ALIEN_SPEED) {
+                        // std::cout<<"Parou"<<std::endl;
+                        associated.box.SetCenter(destination);
+                    } else {
+                        // associated.box
+                        // std::cout<<"POS CENTER:"<< associated.box.Center() <<std::endl;
+                        associated.box.Shift(dir);
+                    }
                 }
-                Component *minion = closest->GetComponent("Minion");
-                if (minion != nullptr) {
-                    Minion *casted = dynamic_cast<Minion*>(minion);
-                    casted->Shoot(point);
+            break;
+            case AlienState::RESTING:
+                if (timer.Get() >= ALIEN_WAIT) {
+                    timer.Restart();
+                    destination = PenguinBody::player->GetBox().Center();
+                    state = AlienState::MOVING;
+                } else {
+                    timer.Update(dt);
                 }
-                taskQueue.pop();
             break;
         }
+    }
+
+    if (hp <= 0) {
+        for (auto auxminion : minionArray) {
+            auto minion = auxminion.lock();
+            if (minion != nullptr) {
+                minion->RequestDelete();
+            }
+        }
+        associated.RequestDelete();
     }
 }
 
@@ -101,4 +126,15 @@ bool Alien::Is(std::string type) {
 
 std::string Alien::Type() {
     return "Alien";
+}
+
+void Alien::NotifyCollision(GameObject &other) {
+    auto cmp = other.GetComponent("Bullet");
+    if (cmp != nullptr) {
+        auto bullet = dynamic_cast<Bullet*>(cmp);
+        if (!bullet->targetsPlayer) {
+            hp -= bullet->GetDamage();
+            std::cout<<"Damage Alien"<<std::endl;
+        }
+    }
 }

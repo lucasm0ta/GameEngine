@@ -12,7 +12,7 @@
 
 Game *Game::instance = nullptr;
 
-Game::Game(std::string title, int width, int height){
+Game::Game(std::string title, int width, int height) : width(width), height(height) {
     // Start SDL
 
     // FLAGS
@@ -76,6 +76,7 @@ Game::Game(std::string title, int width, int height){
 	// Start Window
 	window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+
 	if (window == nullptr) {
 		std::cerr << "Error SDL_CreateWindow: " << SDL_GetError() << std::endl;
 		Mix_CloseAudio();
@@ -106,13 +107,16 @@ Game::Game(std::string title, int width, int height){
 		hasStarted = false;
 		return;
 	}
+	int w,h;
+	SDL_GetWindowSize(window, &w,&h);
+	std::cout<<"WINDOW SIZE: ("<<w<<','<<h<<')'<<std::endl;
+
 	srand(time(NULL));
 	SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" );
 	hasStarted = true;
 	dt = 0;
 	frameStart = 0;
 	std::cout<<"Iniciou"<<std::endl;
-
 }
 
 Game::~Game() {
@@ -122,12 +126,19 @@ Game::~Game() {
     Mix_Quit();
 	SDL_Quit();
 }
+
 SDL_Renderer* Game::GetRenderer() {
     return renderer;
 }
+
 State &Game::GetState() {
     return *state;
 }
+
+Vec2 Game::GetWindowSize() {
+	return Vec2(width, height);
+}
+
 Game &Game::GetInstance() {
     if (instance == nullptr) {
         instance = new Game("Lucas Mota Ribeiro 12/0016885", 1024, 600);

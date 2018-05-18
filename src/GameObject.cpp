@@ -41,7 +41,7 @@ void GameObject::RequestDelete() {
 }
 
 void GameObject::AddComponent(Component *cpt) {
-    std::cout<<"AddCmp "<< cpt <<std::endl;
+    // std::cout<<"AddCmp "<< cpt <<std::endl;
     components.push_back(cpt);
     if (started) {
         cpt->Start();
@@ -70,6 +70,15 @@ Component *GameObject::GetComponent(std::string type) {
     //std::cout<<"GetCmp isDead:"<<((isDead)?"True":"False")<<std::endl;
     return nullptr;
 }
+bool GameObject::HasComponent(std::string type) {
+    for (Component *cmp : components) {
+        if (cmp->Is(type)) {
+            return true;
+        }
+    }
+    //std::cout<<"GetCmp isDead:"<<((isDead)?"True":"False")<<std::endl;
+    return false;
+}
 
 void GameObject::Start() {
     for (auto cmp : components) {
@@ -78,5 +87,12 @@ void GameObject::Start() {
         } else {
             std::cout<<"BAD COMPONENT"<<std::endl;
         }
+    }
+}
+
+void GameObject::NotifyCollision(GameObject &other) {
+    for (auto cmp : components) {
+        // std::cout<<"Notify collision of:"<<cmp->Type()<<std::endl;
+        cmp->NotifyCollision(other);
     }
 }

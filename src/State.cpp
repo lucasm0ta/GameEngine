@@ -1,15 +1,19 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
+#include <map>
 
 #include "../include/Alien.h"
+#include "../include/PenguinBody.h"
 #include "../include/State.h"
 #include "../include/Sound.h"
 #include "../include/TileMap.h"
 #include "../include/TileSet.h"
 #include "../include/InputManager.h"
 #include "../include/Camera.h"
+#include "../include/Collider.h"
 #include "../include/CameraFollower.h"
+#include "../include/Collision.h"
 
 State::State() : quitRequested(false), randGen(randDevice()), started(false) {
     Music mus("./assets/audio/stageState.ogg");
@@ -17,35 +21,38 @@ State::State() : quitRequested(false), randGen(randDevice()), started(false) {
 
     auto bgObj = std::make_shared<GameObject>();
     objectArray.push_back(bgObj);
-
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
     bgObj->box.SetOrigin(0, 0);
-
     bgObj->box.SetOrigin(1024, 600);
     Sprite *spr = new Sprite(*bgObj, "./assets/img/ocean.jpg");
     bgObj->AddComponent(spr);
-
-    CameraFollower *follower = new CameraFollower(*bgObj);
-    bgObj->AddComponent(follower);
-
+    CameraFollower *followerBg = new CameraFollower(*bgObj);
+    bgObj->AddComponent(followerBg);
     //std::cout<<"Created:"<<&(*obj)<<std::endl;
     bgObj->box.SetOrigin(0, 0);
     bgObj->box.SetSize(1024, 600);
 
-    auto obj = std::make_shared<GameObject>();
-    objectArray.push_back(obj);
+    auto tileSetObj = std::make_shared<GameObject>();
+    objectArray.push_back(tileSetObj);
+    TileSet *set = new TileSet(*tileSetObj, "./assets/img/tileset.png", 64, 64);
+    TileMap *tileMap = new TileMap(*tileSetObj, "./assets/map/tileMap.txt", set);
+    tileSetObj->AddComponent(tileMap);
 
-    TileSet *set = new TileSet(*obj, "./assets/img/tileset.png", 64, 64);
-    TileMap *tileMap = new TileMap(*obj, "./assets/map/tileMap.txt", set);
-    obj->AddComponent(tileMap);
+    auto penguinObj = std::make_shared<GameObject>();
+    objectArray.push_back(penguinObj);
+    penguinObj->box.SetCenter(512, 300);
+    PenguinBody *penguin = new PenguinBody(*penguinObj);
+    Camera::Follow(penguinObj);
+    penguinObj->AddComponent(penguin);
 
     auto alienObj = std::make_shared<GameObject>();
     objectArray.push_back(alienObj);
-
-    alienObj->box.SetOrigin(512, 300);
-
+    alienObj->box.SetOrigin(700, 400);
     Alien *alien = new Alien(*alienObj, 5);
     alienObj->AddComponent(alien);
+
+    std::cout<<alienObj->box.GetX()<<" " <<alienObj->box.GetY()<<" "<<alienObj->box.GetW()<<" "<<alienObj->box.GetH()<<std::endl;
+    std::cout<<penguinObj->box.GetX()<<" "<<penguinObj->box.GetY()<<" "<<penguinObj->box.GetW()<<" "<<penguinObj->box.GetH()<<std::endl;
 }
 
 State::~State() {
@@ -67,6 +74,7 @@ void State::Render() {
 }
 
 void State::Update(float dt) {
+    // std::cout<<"TIME dt:"<<dt<<std::endl;
     float speed = dt * CAMERA_SPEED;
     Camera::Update(dt);
 
@@ -121,16 +129,65 @@ void State::Update(float dt) {
     }
 
     //std::cout<<"Size:"<<objectArray.size()<<std::endl;
+    std::vector<std::shared_ptr<GameObject>> objColliders;
+    std::map<std::shared_ptr<GameObject>, Collider*> mapColliders;
     for (unsigned int i = 0; i < objectArray.size(); i++) {
         objectArray[i]->Update(dt);
+        auto collider = objectArray[i]->GetComponent("Collider");
+        if (collider != nullptr) {
+            auto obj = objectArray[i];
+            // obj->NotifyCollision(*obj)
+            // objectArray[i]->NotifyCollision(*objectArray[i]);
+            objColliders.push_back(obj);
+            mapColliders[obj] = dynamic_cast<Collider*>(collider);
+        }
     }
+
+    // GET ALL COLLISION COMBINATIONS
+    const int N = objColliders.size();
+    const int R = 2;
+    std::vector<bool> v(N);
+    std::fill(v.begin(), v.begin() + R, true);
+    if (objColliders.size() > 1) {
+        int count = 0;
+        do {
+            std::vector<std::shared_ptr<GameObject>> aux(2);
+            std::shared_ptr<GameObject> obj1, obj2;
+            for (int i = 0; i < N; ++i) {
+               if (v[i]) {
+                   if (obj1 == nullptr) {
+                       obj1 = objColliders[i];
+                   } else {
+                       obj2 = objColliders[i];
+                   }
+               }
+            }
+            auto col1 = mapColliders[obj1];
+            auto col2 = mapColliders[obj2];
+            if (col1 != col2) {
+                if (Collision::IsColliding(col1->box, col2->box, obj1->angle, obj2->angle)) {
+                // if (Collision::IsColliding(Rect(0, 0, 10, 10), Rect(0, 0, 10, 10), 0, 0)) {
+                    // std::cerr<<"COLLIDING "<< count <<" "<<&(obj1->box)<<" "<<&(obj2->box)<<std::endl;
+                    obj1->NotifyCollision(*obj2);
+                    obj2->NotifyCollision(*obj1);
+                }
+            } else {
+                std::cerr<<"Bad objects at collision!"<<std::endl;
+                std::cerr<<"OBJ 1:"<<((obj1 == nullptr)?"BAD":"GOOD")<<std::endl;
+                std::cerr<<"OBJ 2:"<<((obj2 == nullptr)?"BAD":"GOOD")<<std::endl;
+                break;
+            }
+            count++;
+        } while (std::prev_permutation(v.begin(), v.end()));
+    }
+
     for (unsigned int i = 0; i < objectArray.size(); i++) {
         //std::cout<<"Obj:"<<i<<std::endl;
         if (objectArray[i]->IsDead()) {
             // std::cout<<"Morreu de fato"<<std::endl;
             auto soundComp = objectArray[i].get()->GetComponent("Sound");
             if (!soundComp || !static_cast<Sound *>(soundComp)->Playing()) {
-                std::cerr << "Morreu"<<std::endl;
+                // std::cerr << "Morreu"<<std::endl;
                 objectArray.erase(objectArray.begin() + i);
                 i--; //adjust iterator ???
             }

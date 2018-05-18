@@ -21,6 +21,7 @@ public:
     void Update(float dt);
     void Render();
     bool Is(std::string type);
+    std::string Type();
 
 private:
     Mix_Chunk* chunk;

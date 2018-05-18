@@ -10,7 +10,7 @@
 
 class Bullet : public Component {
 public:
-    Bullet(GameObject &associated, float angle, float speed, int damage, float maxDistance);
+    Bullet(GameObject &associated, float angle, float speed, int damage, float maxDistance, bool targetsPlayer = false);
     ~Bullet();
 
     void Update(float dt);
@@ -18,7 +18,9 @@ public:
     bool Is(std::string type);
     std::string Type();
     int GetDamage();
+    void NotifyCollision(GameObject &other);
 
+    bool targetsPlayer;
 private:
     Vec2 speed;
     float distanceLeft;

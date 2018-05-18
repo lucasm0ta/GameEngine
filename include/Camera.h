@@ -3,10 +3,11 @@
 
 #include "./Vec2.h"
 #include "./GameObject.h"
+#include <memory>
 
 class Camera {
 public:
-    static void Follow(GameObject *newFocus);
+    static void Follow(std::weak_ptr<GameObject> newFocus);
     static void Unfollow();
     static void Update(float dt);
 
@@ -14,7 +15,7 @@ public:
     static Vec2 speed;
 
 private:
-    static GameObject *focus;
+    static std::weak_ptr<GameObject> focus;
 };
 
 #endif /* CAMERA_H */

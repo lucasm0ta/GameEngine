@@ -1,14 +1,20 @@
 #include "../include/Bullet.h"
 #include "../include/Sprite.h"
+#include "../include/Collider.h"
 
 Bullet::Bullet(GameObject &associated, float angle, float speed, int damage,
-    float maxDistance) : Component(associated),
-    speed(speed, 0), distanceLeft(maxDistance), damage(damage) {
+    float maxDistance, bool targetsPlayer) : Component(associated),
+    speed(speed, 0), distanceLeft(maxDistance), damage(damage),
+    targetsPlayer(targetsPlayer) {
 
     this->speed.Rotate(angle);
     Sprite *spr =  new Sprite(associated, "./assets/img/minionbullet2.png", 3, 100);
     associated.box.SetSize(spr->GetWidth(), spr->GetHeight());
     associated.AddComponent(spr);
+
+    Collider *col = new Collider(associated);
+    associated.AddComponent(col);
+
     associated.angle = angle;
 }
 
@@ -39,4 +45,20 @@ std::string Bullet::Type() {
 
 int Bullet::GetDamage() {
     return damage;
+}
+
+void Bullet::NotifyCollision(GameObject &other) {
+    if (!other.HasComponent("Bullet")) {
+        if (targetsPlayer) {
+            if (other.HasComponent("PenguinBody")) {
+                std::cout<<"BULLET HIT PLAYER"<<std::endl;
+                associated.RequestDelete();
+            }
+        } else {
+            if (other.HasComponent("Alien") || other.HasComponent("Minion")) {
+                std::cout<<"BULLET HIT ENEMY"<<std::endl;
+                associated.RequestDelete();
+            }
+        }
+    }
 }

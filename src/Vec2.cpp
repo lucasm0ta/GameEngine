@@ -1,16 +1,22 @@
 #include "../include/Vec2.h"
 
 #include <cmath>
-
-Vec2::Vec2 (float _x, float _y) {
-    x = _x;
-    y = _y;
+Vec2::Vec2() : x(0), y(0){
 }
+
+Vec2::Vec2 (float _x, float _y) : x(_x), y(_y){
+}
+
 void Vec2::Rotate(float rad) {
     float _x = std::cos(rad)*x - std::sin(rad)*y;
     float _y = std::sin(rad)*x + std::cos(rad)*y;
     x = _x;
     y = _y;
+}
+Vec2 Vec2::GetRotated(float rad) const {
+    float _x = std::cos(rad)*x - std::sin(rad)*y;
+    float _y = std::sin(rad)*x + std::cos(rad)*y;
+    return Vec2(_x, _y);
 }
 
 float Vec2::Mag() const {
@@ -19,8 +25,10 @@ float Vec2::Mag() const {
 
 void Vec2::SetMag(float newMag) {
     float mag = Mag();
-    x = newMag*x/mag;
-    y = newMag*y/mag;
+    if (mag > 0) {
+        x = newMag*x/mag;
+        y = newMag*y/mag;
+    }
 }
 
 float Vec2::EuclidianDist(const Vec2 &a, const Vec2 &b) {
@@ -80,8 +88,38 @@ Vec2& Vec2::operator+=(const Vec2 &&a) {
     return *this;
 }
 
+Vec2& Vec2::operator-=(const Vec2 &a) {
+    x -= a.x;
+    y -= a.y;
+    return *this;
+}
+
+Vec2& Vec2::operator-=(const Vec2 &&a) {
+    x -= a.x;
+    y -= a.y;
+    return *this;
+}
+
+Vec2& Vec2::operator*=(float f) {
+    x *= f;
+    y *= f;
+    return *this;
+}
+
+bool Vec2::operator==(const Vec2 &a) {
+    return (x == a.x && y == a.y);
+}
+
 Vec2  Vec2::operator*(float f) const {
     return Vec2(x*f, y*f);
+}
+
+Vec2  Vec2::operator/(float f) const {
+    if (f != 0) {
+        return Vec2(x/f, y/f);
+    } else {
+        return Vec2(x, y);
+    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Vec2& a) {

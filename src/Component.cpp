@@ -6,5 +6,12 @@ Component::Component(GameObject &assoc) : associated(assoc) {
 }
 
 void Component::Start() {
-    std::cout<<"Started Componend WITHOUT Start"<<std::endl;
+    // std::cout<<"Started Componend WITHOUT Start"<<std::endl;
+}
+
+void Component::NotifyCollision(GameObject &other) {
+    // std::cout<<"Collision Undetected from:"<<&associated<<std::endl;
+}
+const Rect Component::GetBox() const {
+    return associated.box;
 }

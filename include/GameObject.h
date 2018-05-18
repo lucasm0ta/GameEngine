@@ -20,7 +20,9 @@ public:
     void AddComponent(Component *cpt);
     void RemoveComponent(Component *cpt);
     Component *GetComponent(std::string type);
+    bool HasComponent(std::string type);
     void Start();
+    void NotifyCollision(GameObject &other);
 
     Rect box;
     float angle;

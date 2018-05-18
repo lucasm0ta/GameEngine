@@ -4,6 +4,7 @@
 #include <string>
 
 #include "GameObject.h"
+#include "Rect.h"
 
 class Component {
 public:
@@ -15,7 +16,9 @@ public:
     virtual void Render() = 0;
     virtual void Update(float dt) = 0;
     virtual void Start();
+    virtual void NotifyCollision(GameObject &other);
 
+    const Rect GetBox() const;
 protected:
     GameObject &associated;
 };

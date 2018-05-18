@@ -1,12 +1,9 @@
 #include "../include/Rect.h"
 #include <cstdlib>
 
-Rect::Rect (float _x, float _y, float _w, float _h) {
-    x = _x;
-    y = _y;
-    w = _x;
-    h = _h;
- }
+Rect::Rect (float _x, float _y, float _w, float _h) :
+    x(_x), y(_y), w(_w), h(_h){
+}
 
 bool Rect::Contains(float _x, float _y) const {
     return (_x >= x && _x <= x+w && _y >= y && _y <= y+h);
@@ -51,6 +48,16 @@ void Rect::SetCenter(float _x, float _y)  {
 void Rect::SetSize(float _w, float _h)  {
     h = _h;
     w = _w;
+    std::cout<<"Size:"<<w<<std::endl;
+}
+
+void Rect::SetScale(Vec2 scale)  {
+    SetScale(scale.GetX(), scale.GetY());
+}
+
+void Rect::SetScale(float sx, float sy)  {
+    h *= sx;
+    w *= sy;
 }
 
 void Rect::SetClip(float _x, float _y, float _w, float _h) {
@@ -58,7 +65,7 @@ void Rect::SetClip(float _x, float _y, float _w, float _h) {
     y = _y;
     w = _x;
     h = _h;
- }
+}
 
 float Rect::GetX() const {
     return x;
